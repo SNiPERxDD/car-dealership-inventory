@@ -33,6 +33,16 @@ describe('runMigrations', () => {
     expect(probe.rows).toEqual([{ id: 1 }]);
   });
 
+  it('enables row level security on its bookkeeping table', async () => {
+    await runMigrations({ pool, directory: path.join(fixtures, 'ordered'), table });
+
+    const result = await pool.query<{ relrowsecurity: boolean }>(
+      'SELECT relrowsecurity FROM pg_class WHERE oid = to_regclass($1)',
+      [table],
+    );
+    expect(result.rows).toEqual([{ relrowsecurity: true }]);
+  });
+
   it('is idempotent: a second run applies nothing', async () => {
     await runMigrations({ pool, directory: path.join(fixtures, 'ordered'), table });
 
