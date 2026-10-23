@@ -8,9 +8,7 @@ const table = 'probe_schema_migrations';
 const fixtures = path.resolve('tests/db/fixtures/migrations');
 
 async function resetProbeObjects(): Promise<void> {
-  await pool.query(
-    `DROP TABLE IF EXISTS ${table}, migrate_probe, migrate_probe_failing`,
-  );
+  await pool.query(`DROP TABLE IF EXISTS ${table}, migrate_probe, migrate_probe_failing`);
 }
 
 beforeEach(resetProbeObjects);
@@ -38,7 +36,11 @@ describe('runMigrations', () => {
   it('is idempotent: a second run applies nothing', async () => {
     await runMigrations({ pool, directory: path.join(fixtures, 'ordered'), table });
 
-    const secondRun = await runMigrations({ pool, directory: path.join(fixtures, 'ordered'), table });
+    const secondRun = await runMigrations({
+      pool,
+      directory: path.join(fixtures, 'ordered'),
+      table,
+    });
 
     expect(secondRun).toEqual([]);
     const probe = await pool.query('SELECT id FROM migrate_probe');

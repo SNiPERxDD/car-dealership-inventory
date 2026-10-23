@@ -13,5 +13,14 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": ["api", "src/server", "db", "tests/api", "tests/db", "tests/unit", "tests/setup", "vitest.config.ts"]
+  "include": [
+    "api",
+    "src/server",
+    "db",
+    "tests/api",
+    "tests/db",
+    "tests/unit",
+    "tests/setup",
+    "vitest.config.ts"
+  ]
 }
