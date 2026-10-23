@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/web/App';
@@ -146,6 +146,33 @@ describe('Northgate inventory application', () => {
     expect(apiCall(2).url.search).toBe('?make=Bolt&minPrice=20000');
     await user.click(screen.getByRole('button', { name: 'Clear filters' }));
     await waitFor(() => expect(apiCall(3).url.pathname).toBe('/api/vehicles'));
+  });
+
+  it('keeps search results when the initial inventory response arrives late', async () => {
+    const staleVehicle = { ...vehicle, id: 'stale', model: 'Stale listing' };
+    const searchResult = { ...vehicle, id: 'search', model: 'Matching result' };
+    let resolveInitial!: (result: Response) => void;
+    const initialRequest = new Promise<Response>((resolve) => {
+      resolveInitial = resolve;
+    });
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockImplementationOnce(() => initialRequest)
+      .mockResolvedValueOnce(response([searchResult]));
+
+    const user = await signIn();
+    await waitFor(() => expect(fetchMock()).toHaveBeenCalledTimes(2));
+    await user.type(screen.getByLabelText('Model'), 'Matching');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+    expect(await screen.findByRole('heading', { name: 'MATCHING RESULT' })).toBeInTheDocument();
+
+    await act(async () => {
+      resolveInitial(response([staleVehicle]));
+      await initialRequest;
+    });
+
+    expect(screen.getByRole('heading', { name: 'MATCHING RESULT' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'STALE LISTING' })).not.toBeInTheDocument();
   });
 
   it('purchases one vehicle, updates stock, and announces success', async () => {

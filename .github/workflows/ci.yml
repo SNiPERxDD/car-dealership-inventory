@@ -39,3 +39,48 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  e2e:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: car
+          POSTGRES_PASSWORD: car
+          POSTGRES_DB: car_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U car -d car_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      DATABASE_URL: postgres://car:car@localhost:5432/car_test
+      TEST_DATABASE_URL: postgres://car:car@localhost:5432/car_test
+      JWT_SECRET: ci-only-p6-jwt-secret-value-for-ephemeral-tests
+      E2E_JWT_SECRET: ci-only-p6-jwt-secret-value-for-ephemeral-tests
+      ADMIN_EMAIL: ci-admin@example.test
+      ADMIN_PASSWORD: ci-only-p6-admin-password
+      E2E_ADMIN_EMAIL: ci-admin@example.test
+      E2E_ADMIN_PASSWORD: ci-only-p6-admin-password
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run db:migrate
+      - run: npm run db:seed
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
