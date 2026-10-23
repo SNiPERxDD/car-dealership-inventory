@@ -173,9 +173,7 @@ describe('vehicle restock API', () => {
   });
 
   it('rejects a restock that would exceed the int4 quantity limit', async () => {
-    const [vehicleId] = await insertVehicleFixtures(pool, [
-      { ...fixture, quantity: 2147483646 },
-    ]);
+    const [vehicleId] = await insertVehicleFixtures(pool, [{ ...fixture, quantity: 2147483646 }]);
     const response = await request(app)
       .post(`/api/vehicles/${vehicleId}/restock`)
       .set('Authorization', `Bearer ${adminToken}`)

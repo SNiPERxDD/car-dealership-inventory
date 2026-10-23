@@ -90,6 +90,39 @@ export class VehicleInventoryRepository {
     return result.rows[0] ? mapVehicleRow(result.rows[0]) : null;
   }
 
+  /** Atomically sells one available unit and returns the updated inventory row. */
+  async purchase(id: string): Promise<Vehicle | null> {
+    const result = await this.pool.query<VehicleRow>(
+      `UPDATE vehicles
+       SET quantity = quantity - 1, updated_at = now()
+       WHERE id = $1 AND quantity > 0
+       RETURNING ${VEHICLE_COLUMNS}`,
+      [id],
+    );
+    return result.rows[0] ? mapVehicleRow(result.rows[0]) : null;
+  }
+
+  /** Atomically adds stock if the resulting quantity remains within PostgreSQL int4. */
+  async restock(id: string, quantity: number): Promise<Vehicle | null> {
+    const result = await this.pool.query<VehicleRow>(
+      `UPDATE vehicles
+       SET quantity = quantity + $2, updated_at = now()
+       WHERE id = $1 AND quantity <= 2147483647 - $2
+       RETURNING ${VEHICLE_COLUMNS}`,
+      [id, quantity],
+    );
+    return result.rows[0] ? mapVehicleRow(result.rows[0]) : null;
+  }
+
+  /** Checks whether a vehicle exists after a conditional inventory update failed. */
+  async exists(id: string): Promise<boolean> {
+    const result = await this.pool.query<{ exists: boolean }>(
+      'SELECT EXISTS (SELECT 1 FROM vehicles WHERE id = $1) AS exists',
+      [id],
+    );
+    return result.rows[0]?.exists ?? false;
+  }
+
   /** Deletes a vehicle and reports whether a row existed for its identifier. */
   async delete(id: string): Promise<boolean> {
     const result = await this.pool.query('DELETE FROM vehicles WHERE id = $1', [id]);

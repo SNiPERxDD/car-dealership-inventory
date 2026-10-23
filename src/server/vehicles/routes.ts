@@ -4,8 +4,14 @@ import type { ParamsDictionary } from 'express-serve-static-core';
 import { HttpError } from '../middleware/errors.js';
 import { requireAdmin, requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validation.js';
-import type { VehicleBody } from './schemas.js';
-import { vehicleBodySchema, vehicleIdSchema, vehicleSearchQuerySchema } from './schemas.js';
+import type { RestockBody, VehicleBody } from './schemas.js';
+import {
+  purchaseBodySchema,
+  restockBodySchema,
+  vehicleBodySchema,
+  vehicleIdSchema,
+  vehicleSearchQuerySchema,
+} from './schemas.js';
 import type { Vehicle } from './vehicle-repository.js';
 import { VehicleService } from './vehicle-service.js';
 
@@ -27,6 +33,21 @@ export function createVehicleRouter(vehicleService: VehicleService, jwtSecret: s
   );
   router.get('/vehicles/search', authenticate, searchVehicles(vehicleService));
   router.get('/vehicles', authenticate, listVehicles(vehicleService));
+  router.post(
+    '/vehicles/:id/purchase',
+    authenticate,
+    validateVehicleId,
+    validateBody(purchaseBodySchema),
+    purchaseVehicle(vehicleService),
+  );
+  router.post(
+    '/vehicles/:id/restock',
+    authenticate,
+    requireAdmin,
+    validateVehicleId,
+    validateBody(restockBodySchema),
+    restockVehicle(vehicleService),
+  );
   router.put(
     '/vehicles/:id',
     authenticate,
@@ -110,5 +131,23 @@ function deleteVehicle(vehicleService: VehicleService): RequestHandler<VehicleId
   return async (request, response) => {
     await vehicleService.delete(request.params.id);
     response.status(204).end();
+  };
+}
+
+/** Builds the authenticated one-unit purchase handler. */
+function purchaseVehicle(
+  vehicleService: VehicleService,
+): RequestHandler<VehicleIdParameters, Vehicle> {
+  return async (request, response) => {
+    response.status(200).json(await vehicleService.purchase(request.params.id));
+  };
+}
+
+/** Builds the administrator restock handler. */
+function restockVehicle(
+  vehicleService: VehicleService,
+): RequestHandler<VehicleIdParameters, Vehicle, RestockBody> {
+  return async (request, response) => {
+    response.status(200).json(await vehicleService.restock(request.params.id, request.body));
   };
 }

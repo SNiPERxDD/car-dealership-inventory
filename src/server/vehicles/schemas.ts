@@ -18,6 +18,18 @@ export const vehicleBodySchema = z
   })
   .strict();
 
+/** Accepts no purchase fields, including an omitted request body. */
+export const purchaseBodySchema = z
+  .object({})
+  .strict()
+  .optional()
+  .transform(() => ({}));
+
+/** Validates a strict positive restock quantity within the PostgreSQL int4 range. */
+export const restockBodySchema = z
+  .object({ quantity: z.number().int().min(1).max(2147483647) })
+  .strict();
+
 /** Accepts a UUID identifier in a vehicle route. */
 export const vehicleIdSchema = z.uuid();
 
@@ -67,6 +79,7 @@ export const vehicleSearchQuerySchema = z
 
 export type VehicleBody = z.infer<typeof vehicleBodySchema>;
 export type VehicleSearchQuery = z.infer<typeof vehicleSearchQuerySchema>;
+export type RestockBody = z.infer<typeof restockBodySchema>;
 
 /** Confirms a JavaScript price has no more than two meaningful decimal places. */
 function hasAtMostTwoDecimalPlaces(price: number): boolean {
