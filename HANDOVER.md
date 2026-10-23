@@ -17,8 +17,14 @@
   self-hosted Big Shoulders Display / Public Sans / IBM Plex Mono); auth, inventory with search,
   admin add/edit/restock/delete via `<dialog>`; 401 clears the session; 147 passing tests
   (jsdom component tests mock `fetch` only); gates pass; checked at 390, 768 and 1280 px.
-- Next: P6 browser testing and submission evidence. Supabase demo accounts and inventory are
-  not seeded yet.
+- P6 in progress: Playwright suite (auth, inventory, admin, failure injection, security) on
+  chromium-desktop and webkit-mobile, 62 passing locally and in the CI `e2e` job; it found a stale
+  initial inventory response overwriting search results, fixed by aborting superseded requests in
+  `useVehicles`. README written. Final security review: no critical/high; two medium (no auth rate
+  limiting, no security headers) await a scope decision, two low rejected (server-side stack logs,
+  404 echoes the caller's own path). Preview Supabase has demo inventory, no users.
+- Next: preview deploy and full run against it, production demo seeding (needs approval),
+  controlled production run, screenshots, `docs/test-report.md`, `PROMPTS.md`.
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),
