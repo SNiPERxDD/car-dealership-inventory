@@ -1,9 +1,16 @@
 # HANDOVER
 
 ## Recap
-- Phase 0 (planning) complete: `PRD.md` reviewed and rewritten, `AGENTS.md` merged with the
-  doctrine, repository initialised (private).
-- No application code yet. Next: Phase 1 (scaffold) per `PRD.md` section 2.
+- P0 planning done; private repo `car-dealership-inventory` on GitHub, CI green.
+- P1 in progress: scaffold, `/api/health`, error envelope, migration runner, CI done (6 tests).
+  Remaining: Vercel + Supabase deployment smoke test (awaiting project setup decision).
+- Next: P2 authentication via a codex lane (RED handed back to the lead before GREEN).
+
+## Local Setup
+- `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),
+  `npm run db:migrate`, `npm run dev` (API 3001, Vite 5173 proxies `/api`).
+- Checks: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`.
+- Docker Desktop must be running; start it with `open -a Docker`.
 
 ## Decisions
 - Stack and all implementation decisions: `PRD.md` section 1 (UUID ids, `numeric(12,2)` price,
@@ -38,3 +45,6 @@
 - zsh does not word-split an unquoted `$VAR`; write CLI flags inline, never in a variable.
 - Global skill installs: run `npx skills add … -g` from outside the project directory.
 - Never use absolute paths or the user's name in repository files.
+- Vitest `globalSetup` runs in the main process: `test.env` does not reach it, so
+  `vitest.config.ts` exports `DATABASE_URL` itself.
+- The rtk proxy cannot parse vitest output; use `rtk proxy npx vitest run` to see results.
