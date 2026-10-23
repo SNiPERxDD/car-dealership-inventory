@@ -5,9 +5,11 @@
 - P1 done: scaffold, `/api/health`, error envelope, migration runner, CI (6 tests); production
   smoke passed (`/api/health` reports the Supabase database up, SPA fallback, 404 envelope).
 - P2 done: register/login, bcrypt password storage, HS256 auth middleware, RLS-protected users,
-  admin seed, and 40 passing tests. P3 done: RLS-protected vehicle storage, authenticated CRUD
-  and search routes, demo inventory seed, and 104 passing tests. Test, typecheck, lint, and build
-  gates pass. Next: P4 inventory integrity.
+  admin seed, and 40 passing tests.
+- P3 done: RLS-protected vehicle storage, authenticated CRUD and search routes, demo inventory
+  seed, and 104 passing tests; gates and CI pass. Migrations 0001-0002 applied to Supabase
+  preview and production (advisors: only the expected `rls_enabled_no_policy` INFO).
+- Next: P4 inventory integrity. Supabase demo accounts and inventory are not seeded yet.
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),
