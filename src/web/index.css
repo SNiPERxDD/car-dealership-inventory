@@ -1,1 +1,968 @@
 @import 'tailwindcss';
+
+@theme {
+  --color-asphalt: #23272e;
+  --color-lot: #e4e7ea;
+  --color-sticker: #fbfbf8;
+  --color-marker: #f2c230;
+  --color-sold: #c8372d;
+  --color-gauge: #2c6e6a;
+  --font-display: 'Big Shoulders Display', sans-serif;
+  --font-body: 'Public Sans Variable', sans-serif;
+  --font-data: 'IBM Plex Mono', monospace;
+}
+
+:root {
+  color: var(--color-asphalt);
+  background: var(--color-lot);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--color-lot);
+  color: var(--color-asphalt);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+button {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-marker);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-asphalt);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+.topbar {
+  background: var(--color-asphalt);
+  color: var(--color-sticker);
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  max-width: 1440px;
+  min-height: 76px;
+  margin: 0 auto;
+  padding: 12px 32px;
+}
+.brand-lockup {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  color: var(--color-sticker);
+  text-decoration: none;
+}
+.wordmark,
+h1,
+.sticker-model {
+  margin: 0;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.wordmark {
+  font-size: 28px;
+  line-height: 1;
+}
+.brand-caption {
+  margin: 3px 0 0;
+  color: var(--color-lot);
+  font-size: 12px;
+  line-height: 1.25;
+}
+.main-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.main-tabs button,
+.topbar-signout {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-sticker);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.main-tabs button[aria-current='page'] {
+  border-color: var(--color-lot);
+}
+.account-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+.account-email {
+  max-width: 260px;
+  overflow: hidden;
+  color: var(--color-lot);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar-signout {
+  border-color: var(--color-lot);
+}
+
+.page-content {
+  width: min(100% - 64px, 1376px);
+  margin: 0 auto;
+  padding: 38px 0 64px;
+}
+.screen-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+h1 {
+  font-size: 44px;
+  line-height: 1;
+}
+.inventory-count {
+  margin: 0 0 2px;
+  color: var(--color-asphalt);
+  font-size: 14px;
+}
+
+.inventory-layout {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  align-items: start;
+  gap: 28px;
+}
+.filter-rail {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 4px;
+  background: var(--color-sticker);
+}
+.filter-rail summary {
+  display: none;
+}
+.filter-rail h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.filter-form,
+.auth-form,
+.dialog-fields {
+  display: grid;
+  gap: 14px;
+}
+label {
+  display: grid;
+  gap: 5px;
+  color: var(--color-asphalt);
+  font-size: 14px;
+  font-weight: 600;
+}
+input,
+select {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 3px;
+  background: var(--color-sticker);
+  color: var(--color-asphalt);
+  font-size: 16px;
+  font-weight: 400;
+}
+.filter-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 2px;
+}
+.primary-button,
+.secondary-button,
+.danger-button,
+.quiet-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+}
+.primary-button {
+  background: var(--color-marker);
+  color: var(--color-asphalt);
+}
+.secondary-button {
+  background: var(--color-sticker);
+  color: var(--color-asphalt);
+}
+.danger-button {
+  border-color: var(--color-sold);
+  background: var(--color-sold);
+  color: var(--color-sticker);
+}
+.quiet-button {
+  min-width: 40px;
+  padding: 4px 10px;
+  background: transparent;
+  color: var(--color-asphalt);
+  font-size: 20px;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.vehicle-sticker {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 4px;
+  background: var(--color-sticker);
+}
+.sticker-header {
+  position: relative;
+  display: flex;
+  min-height: 60px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 15px;
+  background: var(--color-asphalt);
+  color: var(--color-sticker);
+}
+.sticker-category {
+  margin: 0 0 1px;
+  color: var(--color-lot);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sticker-make {
+  margin: 0;
+  color: var(--color-sticker);
+  font-size: 14px;
+  font-weight: 500;
+}
+.sold-stamp {
+  position: absolute;
+  top: 12px;
+  right: 13px;
+  transform: rotate(-8deg);
+  border: 2px solid var(--color-sold);
+  padding: 2px 7px;
+  background: var(--color-sticker);
+  color: var(--color-sold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sticker-body {
+  padding: 15px;
+}
+.sticker-model {
+  min-height: 34px;
+  margin: 0 0 10px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.sticker-specs {
+  margin: 0;
+  border-top: 1px solid var(--color-lot);
+}
+.sticker-specs > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--color-lot);
+  font-size: 12px;
+}
+.sticker-specs dt {
+  color: var(--color-asphalt);
+}
+.sticker-specs dd {
+  margin: 0;
+  color: var(--color-asphalt);
+  font-weight: 600;
+  text-align: right;
+}
+.data-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+.sticker-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 13px 0 12px;
+  font-size: 20px;
+  font-weight: 500;
+}
+.sticker-price > span:first-child {
+  font-size: 12px;
+  font-weight: 600;
+}
+.stock-odometer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.odometer-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.odometer-window {
+  position: relative;
+  display: inline-flex;
+  min-width: 72px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 2px;
+  background: var(--color-marker);
+  color: var(--color-asphalt);
+}
+.is-sold .odometer-window {
+  border: 2px solid var(--color-sold);
+  background: var(--color-sticker);
+  color: var(--color-sold);
+}
+.odometer-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+.odometer-reels {
+  display: flex;
+  height: 24px;
+  overflow: hidden;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.odometer-reel {
+  display: block;
+  height: 24px;
+  overflow: hidden;
+}
+.odometer-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 350ms ease-out;
+}
+.odometer-track > span {
+  height: 24px;
+  text-align: center;
+}
+.purchase-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.purchase-row .primary-button {
+  min-width: 120px;
+}
+.out-of-stock {
+  color: var(--color-sold);
+  font-size: 14px;
+  font-weight: 600;
+}
+.empty-state {
+  display: grid;
+  min-height: 180px;
+  align-content: center;
+  justify-items: start;
+  gap: 16px;
+  padding: 26px;
+  border: 1px dashed var(--color-asphalt);
+  border-radius: 4px;
+  background: var(--color-sticker);
+}
+.empty-state h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.sticker-skeleton {
+  min-height: 340px;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 4px;
+  background: var(--color-sticker);
+}
+
+.mobile-filters {
+  display: none;
+}
+.admin-heading {
+  align-items: center;
+}
+.inventory-table-wrap {
+  overflow: visible;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 4px;
+  background: var(--color-sticker);
+}
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.inventory-table th {
+  padding: 12px 14px;
+  background: var(--color-asphalt);
+  color: var(--color-sticker);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.inventory-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--color-lot);
+  font-size: 14px;
+  vertical-align: middle;
+}
+.inventory-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.admin-model {
+  font-weight: 600;
+}
+.inventory-table .stock-odometer {
+  justify-content: flex-start;
+  gap: 8px;
+}
+.inventory-table .odometer-window {
+  min-width: 62px;
+  height: 30px;
+}
+.inventory-table .odometer-reels {
+  height: 20px;
+  font-size: 16px;
+  line-height: 20px;
+}
+.inventory-table .odometer-reel,
+.inventory-table .odometer-track > span {
+  height: 20px;
+}
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.row-actions button {
+  min-height: 34px;
+  padding: 6px 10px;
+}
+.delete-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  max-width: 430px;
+}
+.delete-confirm p {
+  flex: 1 0 100%;
+  margin: 0 0 2px;
+  color: var(--color-sold);
+  font-size: 14px;
+  font-weight: 600;
+}
+.admin-empty {
+  margin-top: 20px;
+}
+
+.auth-page {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 28px 20px;
+}
+.auth-brand {
+  text-align: center;
+}
+.auth-brand .wordmark {
+  color: var(--color-asphalt);
+  font-size: 44px;
+}
+.auth-brand .brand-caption {
+  color: var(--color-asphalt);
+  font-size: 14px;
+}
+.auth-panel {
+  position: relative;
+  width: min(100%, 440px);
+  overflow: hidden;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 4px;
+  background: var(--color-sticker);
+}
+.auth-panel-band {
+  height: 14px;
+  background: var(--color-asphalt);
+}
+.auth-panel-content {
+  padding: 26px 30px 30px;
+}
+.auth-panel h1 {
+  margin-bottom: 20px;
+  font-size: 44px;
+}
+.auth-segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 3px;
+  background: var(--color-lot);
+}
+.auth-segment button {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--color-asphalt);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.auth-segment button[aria-pressed='true'] {
+  border-color: var(--color-asphalt);
+  background: var(--color-sticker);
+}
+.auth-form {
+  gap: 15px;
+}
+.field-hint {
+  margin: -10px 0 0;
+  color: var(--color-asphalt);
+  font-size: 12px;
+}
+.inline-error {
+  margin: 0;
+  color: var(--color-sold);
+  font-size: 14px;
+  font-weight: 600;
+}
+.auth-submit {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.status-region {
+  position: fixed;
+  z-index: 5;
+  right: max(20px, calc((100vw - 1376px) / 2));
+  bottom: 20px;
+  width: min(440px, calc(100vw - 40px));
+}
+.status-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-gauge);
+  border-radius: 4px;
+  background: var(--color-gauge);
+  color: var(--color-sticker);
+  font-size: 14px;
+  font-weight: 600;
+}
+.status-message .quiet-button {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-color: var(--color-sticker);
+  color: var(--color-sticker);
+}
+.status-message.is-error {
+  border-color: var(--color-sold);
+  background: var(--color-sticker);
+  color: var(--color-sold);
+}
+.status-message.is-error .quiet-button {
+  border-color: var(--color-sold);
+  color: var(--color-sold);
+}
+
+.form-dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 0;
+  border: 1px solid var(--color-asphalt);
+  border-radius: 4px;
+  background: var(--color-sticker);
+  color: var(--color-asphalt);
+  box-shadow: 0 0 0 100vmax color-mix(in srgb, var(--color-asphalt) 62%, transparent);
+}
+.form-dialog::backdrop {
+  background: color-mix(in srgb, var(--color-asphalt) 62%, transparent);
+}
+.form-dialog > form {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dialog-heading h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.dialog-fields {
+  grid-template-columns: 1fr 1fr;
+}
+.dialog-fields label:first-child,
+.dialog-fields label:nth-child(2),
+.dialog-fields label:nth-child(3) {
+  grid-column: span 2;
+}
+.dialog-actions {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+}
+.compact-dialog {
+  width: min(420px, calc(100vw - 32px));
+}
+
+@media (min-width: 1280px) {
+  .sticker-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) and (min-width: 768px) {
+  .page-content {
+    width: min(100% - 40px, 1376px);
+  }
+  .topbar-inner {
+    gap: 16px;
+    padding-inline: 20px;
+  }
+  .account-email {
+    max-width: 160px;
+  }
+  .inventory-layout {
+    grid-template-columns: 205px minmax(0, 1fr);
+    gap: 18px;
+  }
+  .sticker-grid {
+    gap: 14px;
+  }
+  .sticker-body {
+    padding: 12px;
+  }
+  .sticker-model {
+    font-size: 28px;
+  }
+  .inventory-table td {
+    padding: 10px;
+  }
+  .row-actions {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+  .row-actions button {
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 767px) {
+  .topbar-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px 12px;
+    padding: 14px 18px;
+  }
+  .brand-lockup {
+    grid-column: 1 / -1;
+  }
+  .wordmark {
+    font-size: 28px;
+  }
+  .main-tabs {
+    gap: 2px;
+  }
+  .main-tabs button {
+    padding: 7px 9px;
+  }
+  .account-actions {
+    gap: 8px;
+    margin-left: 0;
+  }
+  .account-email {
+    max-width: 118px;
+    font-size: 12px;
+  }
+  .topbar-signout {
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+  .page-content {
+    width: calc(100% - 32px);
+    padding: 28px 0 48px;
+  }
+  .screen-heading {
+    align-items: start;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 44px;
+  }
+  .inventory-count {
+    max-width: 95px;
+    padding-top: 3px;
+    text-align: right;
+  }
+  .inventory-layout {
+    display: block;
+  }
+  .filter-rail {
+    margin-bottom: 16px;
+    padding: 0;
+  }
+  .filter-rail summary {
+    display: block;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    list-style-position: inside;
+  }
+  .filter-rail h2 {
+    padding: 0 14px;
+  }
+  .filter-form {
+    padding: 0 14px 14px;
+  }
+  .filter-rail:not([open]) > :not(summary) {
+    display: none;
+  }
+  .filter-rail[open] h2 {
+    margin-top: 4px;
+  }
+  .sticker-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .vehicle-sticker {
+    max-width: 560px;
+  }
+  .sticker-body {
+    padding: 15px;
+  }
+  .admin-heading {
+    align-items: center;
+  }
+  .admin-heading .primary-button {
+    flex-shrink: 0;
+    padding-inline: 10px;
+  }
+  .inventory-table-wrap {
+    border: 0;
+    background: transparent;
+  }
+  .inventory-table,
+  .inventory-table tbody,
+  .inventory-table tr,
+  .inventory-table td {
+    display: block;
+    width: 100%;
+  }
+  .inventory-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .inventory-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+  .inventory-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--color-asphalt);
+    border-radius: 4px;
+    background: var(--color-sticker);
+  }
+  .inventory-table td {
+    display: flex;
+    min-width: 0;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border: 0;
+    font-size: 14px;
+    text-align: right;
+  }
+  .inventory-table td::before {
+    content: attr(data-label);
+    color: var(--color-asphalt);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+  }
+  .inventory-table td[data-label='Actions'] {
+    grid-column: 1 / -1;
+    display: block;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-lot);
+    text-align: left;
+  }
+  .inventory-table td[data-label='Actions']::before {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .row-actions {
+    gap: 6px;
+  }
+  .row-actions button {
+    flex: 1;
+    padding-inline: 7px;
+  }
+  .inventory-table .stock-odometer {
+    gap: 5px;
+  }
+  .inventory-table .odometer-label {
+    font-size: 12px;
+  }
+  .delete-confirm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .delete-confirm p {
+    grid-column: 1 / -1;
+  }
+  .auth-page {
+    gap: 16px;
+    padding: 24px 16px;
+  }
+  .auth-brand .wordmark {
+    font-size: 44px;
+  }
+  .auth-panel-content {
+    padding: 22px 20px 24px;
+  }
+}
+
+@media (max-width: 390px) {
+  .topbar-inner {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-inline: 14px;
+  }
+  .account-actions {
+    gap: 5px;
+    justify-content: space-between;
+    margin-left: 0;
+  }
+  .account-email {
+    max-width: none;
+  }
+  .main-tabs button {
+    padding-inline: 7px;
+    font-size: 12px;
+  }
+  .page-content {
+    width: calc(100% - 28px);
+  }
+  .screen-heading {
+    display: block;
+  }
+  .inventory-count {
+    max-width: none;
+    margin-top: 8px;
+    text-align: left;
+  }
+  .admin-heading {
+    gap: 10px;
+  }
+  .admin-heading h1 {
+    font-size: 38px;
+  }
+  .admin-heading .primary-button {
+    min-height: 38px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .odometer-track {
+    transition: none;
+  }
+}

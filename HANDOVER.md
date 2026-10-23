@@ -13,7 +13,12 @@
   restock (409 `STOCK_LIMIT_EXCEEDED` past int4), each one conditional `UPDATE ... RETURNING`;
   20-way concurrent purchase sells exactly one unit; 135 passing tests; security review clean.
   No new migration.
-- Next: P5 frontend. Supabase demo accounts and inventory are not seeded yet.
+- P5 done: Northgate Motors SPA (design brief: window-sticker cards, odometer stock counter,
+  self-hosted Big Shoulders Display / Public Sans / IBM Plex Mono); auth, inventory with search,
+  admin add/edit/restock/delete via `<dialog>`; 401 clears the session; 147 passing tests
+  (jsdom component tests mock `fetch` only); gates pass; checked at 390, 768 and 1280 px.
+- Next: P6 browser testing and submission evidence. Supabase demo accounts and inventory are
+  not seeded yet.
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),

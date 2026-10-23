@@ -39,7 +39,7 @@ function fetchMock(): ReturnType<typeof vi.fn<typeof fetch>> {
   return vi.mocked(fetch);
 }
 
-async function signIn(role: 'user' | 'admin' = 'user') {
+async function signIn() {
   const user = userEvent.setup();
   render(<App />);
   await user.type(screen.getByLabelText('Email'), 'staff@northgate.example');
@@ -65,7 +65,9 @@ afterEach(() => {
 
 describe('Northgate inventory application', () => {
   it('stores the returned session after sign-in and opens Inventory', async () => {
-    fetchMock().mockResolvedValueOnce(response(authResult())).mockResolvedValueOnce(response([vehicle]));
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockResolvedValueOnce(response([vehicle]));
 
     await signIn();
 
@@ -75,7 +77,10 @@ describe('Northgate inventory application', () => {
 
   it('shows the server message when sign-in fails', async () => {
     fetchMock().mockResolvedValueOnce(
-      response({ error: { code: 'INVALID_CREDENTIALS', message: 'Email or password is incorrect' } }, 401),
+      response(
+        { error: { code: 'INVALID_CREDENTIALS', message: 'Email or password is incorrect' } },
+        401,
+      ),
     );
 
     const user = userEvent.setup();
@@ -93,29 +98,31 @@ describe('Northgate inventory application', () => {
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     await user.type(screen.getByLabelText('Email'), 'new@northgate.example');
     await user.type(screen.getByLabelText('Password'), 'short');
-    await user.click(screen.getByRole('button', { name: 'Create account', exact: true }));
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
 
     expect(await screen.findByText('Password must be at least 8 characters.')).toBeInTheDocument();
     expect(fetchMock()).not.toHaveBeenCalled();
   });
 
   it('registers a valid account through the register endpoint', async () => {
-    fetchMock().mockResolvedValueOnce(response(authResult(), 201)).mockResolvedValueOnce(response([]));
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult(), 201))
+      .mockResolvedValueOnce(response([]));
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     await user.type(screen.getByLabelText('Email'), 'new@northgate.example');
     await user.type(screen.getByLabelText('Password'), 'long-enough-password');
-    await user.click(screen.getByRole('button', { name: 'Create account', exact: true }));
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
 
     expect(await screen.findByRole('heading', { name: 'Inventory' })).toBeInTheDocument();
     expect(apiCall(0).url.pathname).toBe('/api/auth/register');
   });
 
   it('renders vehicles and disables purchase when stock is zero', async () => {
-    fetchMock().mockResolvedValueOnce(response(authResult())).mockResolvedValueOnce(
-      response([{ ...vehicle, quantity: 0 }]),
-    );
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockResolvedValueOnce(response([{ ...vehicle, quantity: 0 }]));
 
     await signIn();
 
@@ -168,7 +175,9 @@ describe('Northgate inventory application', () => {
     const user = await signIn();
     await user.click(await screen.findByRole('button', { name: 'Purchase' }));
 
-    expect(await screen.findByText('None left in stock. The listing has been refreshed.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('None left in stock. The listing has been refreshed.'),
+    ).toBeInTheDocument();
     await waitFor(() => expect(apiCall(3).url.pathname).toBe('/api/vehicles'));
   });
 
@@ -176,15 +185,16 @@ describe('Northgate inventory application', () => {
     fetchMock()
       .mockResolvedValueOnce(response(authResult('user')))
       .mockResolvedValueOnce(response([]));
-    await signIn('user');
+    await signIn();
     expect(await screen.findByRole('heading', { name: 'Inventory' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Manage stock' })).not.toBeInTheDocument();
 
     cleanup();
+    localStorage.clear();
     fetchMock()
       .mockResolvedValueOnce(response(authResult('admin')))
       .mockResolvedValueOnce(response([]));
-    await signIn('admin');
+    await signIn();
     expect(await screen.findByRole('button', { name: 'Manage stock' })).toBeInTheDocument();
   });
 
@@ -200,7 +210,7 @@ describe('Northgate inventory application', () => {
       .mockResolvedValueOnce(response([vehicle]))
       .mockResolvedValueOnce(response(undefined, 204))
       .mockResolvedValueOnce(response([]));
-    const user = await signIn('admin');
+    const user = await signIn();
     await user.click(await screen.findByRole('button', { name: 'Manage stock' }));
 
     await user.click(screen.getByRole('button', { name: 'Add vehicle' }));
@@ -212,7 +222,9 @@ describe('Northgate inventory application', () => {
     await user.click(screen.getByRole('button', { name: 'Save vehicle' }));
     await waitFor(() => expect(apiCall(2).url.pathname).toBe('/api/vehicles'));
     expect(apiCall(2).init.method).toBe('POST');
-    expect(apiCall(2).init.body).toBe(JSON.stringify({ make: 'Bolt', model: 'Trail', category: 'SUV', price: 28000, quantity: 3 }));
+    expect(apiCall(2).init.body).toBe(
+      JSON.stringify({ make: 'Bolt', model: 'Trail', category: 'SUV', price: 28000, quantity: 3 }),
+    );
 
     await user.click(await screen.findByRole('button', { name: 'Edit' }));
     await user.clear(screen.getByLabelText('Price'));
@@ -227,7 +239,9 @@ describe('Northgate inventory application', () => {
     await user.click(await screen.findByRole('button', { name: 'Restock' }));
     await user.type(screen.getByLabelText('Quantity to restock'), '5');
     await user.click(screen.getByRole('button', { name: 'Restock vehicle' }));
-    await waitFor(() => expect(apiCall(6).url.pathname).toBe(`/api/vehicles/${vehicle.id}/restock`));
+    await waitFor(() =>
+      expect(apiCall(6).url.pathname).toBe(`/api/vehicles/${vehicle.id}/restock`),
+    );
     expect(apiCall(6).init.method).toBe('POST');
     expect(apiCall(6).init.body).toBe(JSON.stringify({ quantity: 5 }));
 
@@ -258,6 +272,8 @@ describe('Northgate inventory application', () => {
     await user.type(screen.getByLabelText('Password'), 'correct-horse');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(await screen.findByText('Could not reach the server. Check your connection and try again.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Could not reach the server. Check your connection and try again.'),
+    ).toBeInTheDocument();
   });
 });
