@@ -17,11 +17,14 @@ export async function resetVehicles(pool: pg.Pool): Promise<void> {
 export async function insertVehicleFixtures(
   pool: pg.Pool,
   vehicles: VehicleFixture[],
-): Promise<void> {
+): Promise<string[]> {
+  const ids: string[] = [];
   for (const vehicle of vehicles) {
-    await pool.query(
-      'INSERT INTO vehicles (make, model, category, price, quantity) VALUES ($1, $2, $3, $4, $5)',
+    const result = await pool.query<{ id: string }>(
+      'INSERT INTO vehicles (make, model, category, price, quantity) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [vehicle.make, vehicle.model, vehicle.category, vehicle.price, vehicle.quantity],
     );
+    ids.push(result.rows[0].id);
   }
+  return ids;
 }
