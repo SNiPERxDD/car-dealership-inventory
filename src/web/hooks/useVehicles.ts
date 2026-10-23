@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError, apiRequest } from '../lib/api-client';
 import type { ApiRequestOptions } from '../lib/api-client';
 
@@ -39,6 +39,7 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
   const [toastError, setToastError] = useState(false);
+  const requestController = useRef<AbortController | null>(null);
 
   const requestOptions = useCallback(
     (options: ApiRequestOptions = {}): ApiRequestOptions => ({
@@ -51,35 +52,46 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
 
   const load = useCallback(
     async (path = '/api/vehicles') => {
+      const controller = new AbortController();
+      requestController.current?.abort();
+      requestController.current = controller;
       try {
-        setVehicles(await apiRequest<Vehicle[]>(path, requestOptions()));
+        const result = await apiRequest<Vehicle[]>(
+          path,
+          requestOptions({ signal: controller.signal }),
+        );
+        if (!controller.signal.aborted) setVehicles(result);
       } catch (error) {
-        setToast(errorMessage(error));
-        setToastError(true);
+        if (!controller.signal.aborted) {
+          setToast(errorMessage(error));
+          setToastError(true);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     },
     [requestOptions],
   );
 
   useEffect(() => {
-    let current = true;
-    void apiRequest<Vehicle[]>('/api/vehicles', requestOptions())
+    const controller = new AbortController();
+    requestController.current?.abort();
+    requestController.current = controller;
+    void apiRequest<Vehicle[]>('/api/vehicles', requestOptions({ signal: controller.signal }))
       .then((result) => {
-        if (current) setVehicles(result);
+        if (!controller.signal.aborted) setVehicles(result);
       })
       .catch((error: unknown) => {
-        if (current) {
+        if (!controller.signal.aborted) {
           setToast(errorMessage(error));
           setToastError(true);
         }
       })
       .finally(() => {
-        if (current) setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       });
     return () => {
-      current = false;
+      requestController.current?.abort();
     };
   }, [requestOptions]);
 
