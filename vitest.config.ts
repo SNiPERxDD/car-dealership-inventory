@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'node',
       include: ['tests/api/**/*.test.ts', 'tests/db/**/*.test.ts', 'tests/unit/**/*.test.ts'],
+      testTimeout: 15_000,
       env: { DATABASE_URL: testDatabaseUrl },
       globalSetup: ['tests/setup/global-setup.ts'],
       fileParallelism: false,

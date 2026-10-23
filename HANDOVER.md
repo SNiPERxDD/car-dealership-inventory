@@ -4,11 +4,15 @@
 - P0 planning done; private repo `car-dealership-inventory` on GitHub, CI green.
 - P1 done: scaffold, `/api/health`, error envelope, migration runner, CI (6 tests); production
   smoke passed (`/api/health` reports the Supabase database up, SPA fallback, 404 envelope).
-- P2 in progress: authentication via a codex lane (RED handed back to the lead before GREEN).
+- P2 done: register/login, bcrypt password storage, HS256 auth middleware, RLS-protected users,
+  admin seed, and 40 passing tests. Test, typecheck, lint, and build gates pass. Next: P3 vehicle
+  management.
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),
   `npm run db:migrate`, `npm run dev` (API 3001, Vite 5173 proxies `/api`).
+- Set local `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`, then run `npm run db:seed` to create or
+  update the local administrator.
 - Checks: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`.
 - Docker Desktop must be running; start it with `open -a Docker`.
 
@@ -16,6 +20,8 @@
 - Stack and all implementation decisions: `PRD.md` section 1 (UUID ids, `numeric(12,2)` price,
   atomic conditional purchase update, JWT ~1h in localStorage, admin seeded from env).
 - Databases: Docker `postgres:16` locally and in CI; Supabase for preview and production.
+- Auth: bcrypt cost 12, HS256 JWT expiry 1 hour, `JWT_SECRET` must be at least 32 characters;
+  Vitest timeout is 15 seconds for the concurrent bcrypt registration case.
 - Commits: RED/GREEN split, `Co-authored-by` trailer per contributing model, never session URLs.
 - Assessment PDF, `deleted/`, `_experiments/`, and `.env*` are git-ignored.
 - Delegation (see the lead's HERDR playbook): codex luna / muse implement; reviews go to any of
@@ -41,7 +47,9 @@
   `car-dealership-inventory.vercel.app` belongs to someone else; never test against it.
 - The function is pinned to `bom1` (Mumbai), next to the ap-south-1 database.
 - Every migration enables RLS on its tables (Supabase exposes `public` via the Data API);
-  run Supabase `get_advisors` after applying migrations remotely.
+  run Supabase `get_advisors` after applying migrations remotely. No policies is deliberate:
+  `anon`/`authenticated` are denied, and the API connects as the table owner, which RLS
+  does not restrict.
 
 ## Pushing (standing approval, private repo `origin` = car-dealership-inventory)
 - When: after every major chunk — each green slice, each phase gate, each doc baseline.

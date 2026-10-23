@@ -17,10 +17,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:up": "docker compose up -d --wait",
-    "db:migrate": "tsx --env-file-if-exists=.env db/migrate.ts"
+    "db:migrate": "tsx --env-file-if-exists=.env db/migrate.ts",
+    "db:seed": "tsx --env-file-if-exists=.env db/seed.ts"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "express": "^5.3.0",
+    "jose": "^6.2.13",
     "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -40,7 +43,6 @@
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
-    "jose": "^6.2.13",
     "prettier": "^3.9.10",
     "supertest": "^7.3.1",
     "tailwindcss": "^4.3.3",
