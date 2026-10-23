@@ -7,3 +7,5 @@ PROMPTS.md
 AGENTS.md
 HANDOVER.md
 CHANGELOG.md
+playwright-report/
+test-results/
