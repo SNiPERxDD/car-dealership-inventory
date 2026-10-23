@@ -5,14 +5,15 @@
 - P1 done: scaffold, `/api/health`, error envelope, migration runner, CI (6 tests); production
   smoke passed (`/api/health` reports the Supabase database up, SPA fallback, 404 envelope).
 - P2 done: register/login, bcrypt password storage, HS256 auth middleware, RLS-protected users,
-  admin seed, and 40 passing tests. Test, typecheck, lint, and build gates pass. Next: P3 vehicle
-  management.
+  admin seed, and 40 passing tests. P3 done: RLS-protected vehicle storage, authenticated CRUD
+  and search routes, demo inventory seed, and 104 passing tests. Test, typecheck, lint, and build
+  gates pass. Next: P4 inventory integrity.
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),
   `npm run db:migrate`, `npm run dev` (API 3001, Vite 5173 proxies `/api`).
 - Set local `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`, then run `npm run db:seed` to create or
-  update the local administrator.
+  update the local administrator and add demo inventory when the vehicle table is empty.
 - Checks: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`.
 - Docker Desktop must be running; start it with `open -a Docker`.
 
@@ -49,7 +50,8 @@
 - Every migration enables RLS on its tables (Supabase exposes `public` via the Data API);
   run Supabase `get_advisors` after applying migrations remotely. No policies is deliberate:
   `anon`/`authenticated` are denied, and the API connects as the table owner, which RLS
-  does not restrict.
+  does not restrict (pooler user `postgres.<project-ref>` is the `postgres` role, owner of
+  every table, `rolbypassrls = true`, RLS not forced; verified on Supabase).
 
 ## Pushing (standing approval, private repo `origin` = car-dealership-inventory)
 - When: after every major chunk — each green slice, each phase gate, each doc baseline.

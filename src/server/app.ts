@@ -7,6 +7,9 @@ import type { TokenSigner } from './auth/auth-service.js';
 import { UserRepository } from './auth/user-repository.js';
 import { createHealthRouter } from './health.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
+import { VehicleInventoryRepository } from './vehicles/vehicle-repository.js';
+import { createVehicleRouter } from './vehicles/routes.js';
+import { VehicleService } from './vehicles/vehicle-service.js';
 
 export interface AppDependencies {
   pool: pg.Pool;
@@ -21,6 +24,8 @@ export function createApp({ pool, jwtSecret }: AppDependencies): express.Express
   const userRepository = new UserRepository(pool);
   const tokenSigner: TokenSigner = (user) => signToken(jwtSecret, user);
   const authService = new AuthService(userRepository, tokenSigner);
+  const vehicleRepository = new VehicleInventoryRepository(pool);
+  const vehicleService = new VehicleService(vehicleRepository);
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '100kb' }));
@@ -28,6 +33,7 @@ export function createApp({ pool, jwtSecret }: AppDependencies): express.Express
   const api = express.Router();
   api.use(createHealthRouter(pool));
   api.use(createAuthRouter(authService));
+  api.use(createVehicleRouter(vehicleService, jwtSecret));
   app.use('/api', api);
 
   app.use(notFoundHandler);

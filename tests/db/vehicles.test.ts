@@ -12,19 +12,8 @@ afterAll(async () => {
   await pool.end();
 });
 
-/** Asserts the P3 table exists and lets a RED test end before querying a missing relation. */
-async function vehicleTableExists(): Promise<boolean> {
-  const result = await pool.query<{ vehicles_table: string | null }>(
-    "SELECT to_regclass('public.vehicles') AS vehicles_table",
-  );
-  const exists = result.rows[0]?.vehicles_table === 'vehicles';
-  expect(result.rows[0]?.vehicles_table).toBe('vehicles');
-  return exists;
-}
-
 describe('vehicles storage', () => {
   it('creates vehicles with generated UUID identifiers', async () => {
-    if (!(await vehicleTableExists())) return;
     const result = await pool.query(
       `INSERT INTO vehicles (make, model, category, price, quantity)
        VALUES ('Honda', 'Civic', 'sedan', 19999.99, 2), ('Honda', 'Civic', 'sedan', 19999.99, 2)
@@ -39,7 +28,6 @@ describe('vehicles storage', () => {
   });
 
   it('stores vehicle fields with the specified PostgreSQL types and defaults', async () => {
-    if (!(await vehicleTableExists())) return;
     const result = await pool.query(
       `SELECT column_name, data_type, numeric_precision, numeric_scale, is_nullable
        FROM information_schema.columns
@@ -73,7 +61,6 @@ describe('vehicles storage', () => {
   });
 
   it('enables row-level security on vehicles', async () => {
-    if (!(await vehicleTableExists())) return;
     const result = await pool.query(
       "SELECT relrowsecurity FROM pg_class WHERE oid = 'public.vehicles'::regclass",
     );
@@ -82,7 +69,6 @@ describe('vehicles storage', () => {
   });
 
   it('rejects a negative vehicle price', async () => {
-    if (!(await vehicleTableExists())) return;
     await expect(
       pool.query(
         'INSERT INTO vehicles (make, model, category, price, quantity) VALUES ($1, $2, $3, $4, $5)',
@@ -92,7 +78,6 @@ describe('vehicles storage', () => {
   });
 
   it('rejects a negative vehicle quantity', async () => {
-    if (!(await vehicleTableExists())) return;
     await expect(
       pool.query(
         'INSERT INTO vehicles (make, model, category, price, quantity) VALUES ($1, $2, $3, $4, $5)',

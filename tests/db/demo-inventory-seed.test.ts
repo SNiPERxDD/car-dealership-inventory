@@ -45,13 +45,10 @@ describe('seedDemoInventory', () => {
       'SELECT count(*)::int AS count FROM vehicles',
     );
 
-    expect(after.rows[0].count).toBe(before.rows[0].count);
+    expect(after.rows[0]!.count).toBe(before.rows[0]!.count);
   });
 
   it('leaves existing inventory unchanged', async () => {
-    const table = await pool.query("SELECT to_regclass('public.vehicles') AS vehicles_table");
-    expect(table.rows[0]?.vehicles_table).toBe('vehicles');
-    if (!table.rows[0]?.vehicles_table) return;
     await pool.query(
       'INSERT INTO vehicles (make, model, category, price, quantity) VALUES ($1, $2, $3, $4, $5)',
       ['Existing', 'Vehicle', 'sedan', 10, 1],

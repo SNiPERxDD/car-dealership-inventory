@@ -6,3 +6,4 @@
 2026-10-24 03:12 | P1 closed: function pinned to bom1, production smoke verified, JWT secrets provisioned on Vercel | vercel.json, HANDOVER.md
 2026-10-24 03:24 | P2 auth: users migration, register/login, HS256 middleware, admin seed and configuration | db/migrations/, db/seed.ts, src/server/auth/, src/server/config.ts, src/server/app.ts, src/server/middleware/, api/index.ts, package.json, .env.example, vitest.config.ts, HANDOVER.md
 2026-10-24 03:37 | Migration runner enables RLS on its bookkeeping table | db/migrate.ts, tests/db/migrate.test.ts
+2026-10-24 03:48 | P3 vehicle inventory: RLS migration, CRUD/search API, repositories, schemas and demo seed | db/migrations/0002_create_vehicles.sql, src/server/vehicles/, src/server/app.ts, db/seed.ts, tests/, HANDOVER.md
