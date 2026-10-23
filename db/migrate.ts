@@ -39,6 +39,8 @@ export async function runMigrations({
          applied_at timestamptz NOT NULL DEFAULT now()
        )`,
     );
+    // Supabase exposes `public` through its Data API; the bookkeeping table follows the RLS rule.
+    await client.query(`ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY`);
     const existing = await client.query<{ name: string }>(`SELECT name FROM ${table}`);
     const done = new Set(existing.rows.map((row) => row.name));
 
