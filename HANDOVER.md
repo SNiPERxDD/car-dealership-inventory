@@ -2,9 +2,9 @@
 
 ## Recap
 - P0 planning done; private repo `car-dealership-inventory` on GitHub, CI green.
-- P1 in progress: scaffold, `/api/health`, error envelope, migration runner, CI done (6 tests).
-  Remaining: Vercel + Supabase deployment smoke test (projects created, see Deployment).
-- Next: P2 authentication via a codex lane (RED handed back to the lead before GREEN).
+- P1 done: scaffold, `/api/health`, error envelope, migration runner, CI (6 tests); production
+  smoke passed (`/api/health` reports the Supabase database up, SPA fallback, 404 envelope).
+- P2 in progress: authentication via a codex lane (RED handed back to the lead before GREEN).
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),
@@ -31,7 +31,11 @@
   pooler 5432 for migrations, `sslmode=verify-full` with `db/certs/supabase-root-2021.crt`
   (fingerprint matches Supabase's official download; Vercel bundles it via `includeFiles`).
 - Database passwords are set by the user in the Supabase dashboard and entered with
-  `vercel env add`; the lead never reads or prints them.
+  `vercel env add`; the lead never reads or prints them. `JWT_SECRET` (separate per environment)
+  was generated with `openssl rand` and piped straight into `vercel env add --sensitive`.
+- Production alias: `car-dealership-inventory-phi.vercel.app`. The bare
+  `car-dealership-inventory.vercel.app` belongs to someone else; never test against it.
+- The function is pinned to `bom1` (Mumbai), next to the ap-south-1 database.
 - Every migration enables RLS on its tables (Supabase exposes `public` via the Data API);
   run Supabase `get_advisors` after applying migrations remotely.
 
