@@ -1,0 +1,27 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.vercel/
+
+# Environment (keep the template)
+.env*
+!.env.example
+
+# Test output
+playwright/.auth/
+playwright-report/
+test-results/
+blob-report/
+
+# Local-only material
+deleted/
+_experiments/
+AI_Kata_*.pdf
+.agents/
+.claude/
+skills-lock.json
+
+# OS / editor
+.DS_Store
+*.log
