@@ -1,0 +1,9 @@
+dist
+coverage
+deleted
+package-lock.json
+PRD.md
+PROMPTS.md
+AGENTS.md
+HANDOVER.md
+CHANGELOG.md

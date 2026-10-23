@@ -25,3 +25,4 @@ skills-lock.json
 # OS / editor
 .DS_Store
 *.log
+.vitest/
