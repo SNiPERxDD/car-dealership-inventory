@@ -9,7 +9,11 @@
 - P3 done: RLS-protected vehicle storage, authenticated CRUD and search routes, demo inventory
   seed, and 104 passing tests; gates and CI pass. Migrations 0001-0002 applied to Supabase
   preview and production (advisors: only the expected `rls_enabled_no_policy` INFO).
-- Next: P4 inventory integrity. Supabase demo accounts and inventory are not seeded yet.
+- P4 done: atomic purchase (any authenticated user, 409 `OUT_OF_STOCK` at zero) and admin-only
+  restock (409 `STOCK_LIMIT_EXCEEDED` past int4), each one conditional `UPDATE ... RETURNING`;
+  20-way concurrent purchase sells exactly one unit; 135 passing tests; security review clean.
+  No new migration.
+- Next: P5 frontend. Supabase demo accounts and inventory are not seeded yet.
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),
@@ -88,4 +92,6 @@
 - Supabase TLS: without the root CA, `pg` fails with `SELF_SIGNED_CERT_IN_CHAIN`; never
   "fix" it with `sslmode=no-verify` or `rejectUnauthorized: false`.
 - ESM scripts resolve packages from their own directory: run probes from `_experiments/`.
+- Never run two lanes' `vitest` at once: they share `car_test` and corrupt each other's
+  row counts (seen as a spurious `auth.test.ts` failure). Serialize test runs across lanes.
 - The rtk proxy cannot parse vitest output; use `rtk proxy npx vitest run` to see results.
