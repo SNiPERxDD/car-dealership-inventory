@@ -35,6 +35,13 @@
 - Commit RED and GREEN separately: `test: … (red)`, `feat: … (green)`, `refactor: …`.
 - Refactor when warranted; never fabricate refactor commits.
 - Follow SOLID pragmatically: route → service → repository, no speculative abstractions.
+  S: routes own HTTP, services own business rules, repositories own SQL. O/L: extend by adding
+  modules, not by inheritance. I: small contracts around real dependencies. D: inject the pool,
+  repositories and configuration (e.g. `createApp({ pool, jwtSecret })`).
+- Briefs for delegated work must cite the requirement source (assessment brief line, `PRD.md`
+  section), state the exact contract (routes, statuses, error codes, schema), name the layer
+  each piece belongs to under the SOLID split above, and require tests against the public
+  contract only (HTTP, exported middleware, database). Steer a lane mid-task when it drifts.
 
 ## 5. Code Standards
 - Production-grade, following project conventions and current best practices; verify online

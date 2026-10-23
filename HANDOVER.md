@@ -22,6 +22,10 @@
   codex (review mode), opencode DeepSeek, kilo Agnes after every slice; reviews are cheap, use
   them freely. Lanes never commit; the lead commits RED after confirming failure, then GREEN.
   Parallel lanes use git worktrees under `../wt/` and a separate database each.
+- Briefs (kept in the git-ignored `_experiments/briefs/`) follow `AGENTS.md` section 4: cite the
+  requirement source, pin the contract, assign each piece to route / service / repository
+  (SOLID), test only the public contract. RED and GREEN are separate messages; the lead steers
+  with `worker send --steer` when a lane drifts.
 
 ## Deployment
 - Supabase (ap-south-1, pooler host `aws-0-ap-south-1.pooler.supabase.com`):
