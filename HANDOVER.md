@@ -3,7 +3,7 @@
 ## Recap
 - P0 planning done; private repo `car-dealership-inventory` on GitHub, CI green.
 - P1 in progress: scaffold, `/api/health`, error envelope, migration runner, CI done (6 tests).
-  Remaining: Vercel + Supabase deployment smoke test (awaiting project setup decision).
+  Remaining: Vercel + Supabase deployment smoke test (projects created, see Deployment).
 - Next: P2 authentication via a codex lane (RED handed back to the lead before GREEN).
 
 ## Local Setup
@@ -23,6 +23,18 @@
   them freely. Lanes never commit; the lead commits RED after confirming failure, then GREEN.
   Parallel lanes use git worktrees under `../wt/` and a separate database each.
 
+## Deployment
+- Supabase (ap-south-1, pooler host `aws-0-ap-south-1.pooler.supabase.com`):
+  `car-dealership-preview` backs Vercel preview + Playwright;
+  `car-dealership-prod` backs production with demo data only.
+- `DATABASE_URL` format is in `.env.example`: transaction pooler 6543 for the app, session
+  pooler 5432 for migrations, `sslmode=verify-full` with `db/certs/supabase-root-2021.crt`
+  (fingerprint matches Supabase's official download; Vercel bundles it via `includeFiles`).
+- Database passwords are set by the user in the Supabase dashboard and entered with
+  `vercel env add`; the lead never reads or prints them.
+- Every migration enables RLS on its tables (Supabase exposes `public` via the Data API);
+  run Supabase `get_advisors` after applying migrations remotely.
+
 ## Pushing (standing approval, private repo `origin` = car-dealership-inventory)
 - When: after every major chunk — each green slice, each phase gate, each doc baseline.
   Never push a red tip; RED commits go up only together with their GREEN.
@@ -37,6 +49,12 @@
 - After: `gh run list -L 1` once CI exists; report the commit range pushed.
 
 ## Instructions
+- Use the installed skills when a task matches one: `supabase` and
+  `supabase-postgres-best-practices` for database work, `test-driven-development` /
+  `tdd-practices` per slice, `vercel:deploy` / `vercel:env` / `vercel:verification` for
+  deployment, `api-security-review` and `requesting-code-review` before phase gates,
+  `impeccable` / `frontend-design` / `web-design-guidelines` for P5, `playwright-cli` for P6,
+  `verification-before-completion` before claiming a phase done.
 - Read `AGENTS.md`, then this file, then the relevant `PRD.md` phase before starting work.
 - Append to `CHANGELOG.md` after each architectural, feature, or fix change.
 - Update this file at the end of every session and phase.
@@ -47,4 +65,7 @@
 - Never use absolute paths or the user's name in repository files.
 - Vitest `globalSetup` runs in the main process: `test.env` does not reach it, so
   `vitest.config.ts` exports `DATABASE_URL` itself.
+- Supabase TLS: without the root CA, `pg` fails with `SELF_SIGNED_CERT_IN_CHAIN`; never
+  "fix" it with `sslmode=no-verify` or `rejectUnauthorized: false`.
+- ESM scripts resolve packages from their own directory: run probes from `_experiments/`.
 - The rtk proxy cannot parse vitest output; use `rtk proxy npx vitest run` to see results.

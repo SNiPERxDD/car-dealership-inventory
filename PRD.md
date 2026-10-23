@@ -38,6 +38,8 @@ Migrations are plain SQL in `db/migrations/`, applied by one script to every env
 
 - One Vercel project: Vite static assets plus an Express-backed API function. Verify routing in P1, not after everything is built.
 - Serverless database access goes through Supabase's transaction pooler, with a small application-side pool and no named prepared statements.
+- TLS is verified (`sslmode=verify-full`) against the committed Supabase root CA in `db/certs/`. Migrations use the session pooler, because session advisory locks do not hold in transaction mode.
+- Tables live in `public`, which Supabase exposes through its Data API. Every migration enables RLS without policies, so only the server's owner role reads or writes them.
 - Database credentials stay server-side. Use least-privilege access where practical.
 - Test and production data are separate. Destructive automated tests never run against production inventory.
 - Authentication and authorization live in Express. Public registration never grants administrator privileges.
