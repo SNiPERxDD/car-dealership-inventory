@@ -1,10 +1,10 @@
 import request from 'supertest';
 import { afterAll, describe, expect, it } from 'vitest';
-import { createApp } from '../../src/server/app.js';
 import { createPool } from '../../src/server/db/pool.js';
+import { buildTestApp } from '../support/app.js';
 
 const pool = createPool(process.env.DATABASE_URL);
-const app = createApp({ pool });
+const app = buildTestApp(pool);
 
 afterAll(async () => {
   await pool.end();
@@ -20,7 +20,7 @@ describe('GET /api/health', () => {
 
   it('returns 503 with the error shape when the database is unreachable', async () => {
     const unreachablePool = createPool('postgres://nobody:nothing@127.0.0.1:1/none');
-    const unhealthyApp = createApp({ pool: unreachablePool });
+    const unhealthyApp = buildTestApp(unreachablePool);
 
     const response = await request(unhealthyApp).get('/api/health');
     await unreachablePool.end();
