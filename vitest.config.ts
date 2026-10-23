@@ -12,7 +12,12 @@ export default defineConfig(({ mode }) => {
   return {
     test: {
       environment: 'node',
-      include: ['tests/api/**/*.test.ts', 'tests/db/**/*.test.ts', 'tests/unit/**/*.test.ts'],
+      include: [
+        'tests/api/**/*.test.ts',
+        'tests/db/**/*.test.ts',
+        'tests/unit/**/*.test.ts',
+        'tests/web/**/*.test.tsx',
+      ],
       testTimeout: 15_000,
       env: { DATABASE_URL: testDatabaseUrl },
       globalSetup: ['tests/setup/global-setup.ts'],
