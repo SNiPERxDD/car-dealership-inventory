@@ -28,11 +28,9 @@
   Preview Playwright run: 60 passed, 2 expected expired-token skips. Screenshots, README demo
   credentials and `docs/test-report.md` are committed.
   Controlled production run (owner-approved, fixture-only tests, chromium-desktop): 10 passed;
-  demo inventory unchanged (10 vehicles, 38 units). Preview fixture users were removed.
-- Next (owner): complete `PROMPTS.md` with the redacted raw transcripts (PRD "PROMPTS.md" rule);
-  delete the 6 fixture users left in production
-  (`delete from users where role = 'user' and email like '%@example.test'`), which the agent
-  permission check blocked as a production delete.
+  demo inventory unchanged (10 vehicles, 38 units). Fixture users were removed from preview and
+  production afterwards (`delete from users where role = 'user' and email like '%@example.test'`).
+- Next (owner): complete `PROMPTS.md` with the redacted raw transcripts (PRD "PROMPTS.md" rule).
 - Fixture users are never deleted by the Playwright teardown (no delete-user route); each
   deployed run leaves `@example.test` accounts behind.
 
