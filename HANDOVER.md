@@ -38,7 +38,7 @@
   toast no longer covers content, auth kicker "Buyers and staff"; 154 unit and 70 e2e tests pass.
   Rejected as false positives: Price/Stock header collision, FilterRail SSR, admin empty-state
   button. Not done (owner decision): derive the displayed role from the JWT instead of the
-  cached session; the server already enforces admin routes. The fixes are not yet redeployed.
+  cached session; the server already enforces admin routes. Live on production (auto-deploy from `main`).
 - Next (owner): complete `PROMPTS.md` with the redacted raw transcripts (PRD "PROMPTS.md" rule).
 - Fixture users are never deleted by the Playwright teardown (no delete-user route); each
   deployed run leaves `@example.test` accounts behind.
