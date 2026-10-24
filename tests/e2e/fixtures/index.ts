@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { test as base, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { adminEmail, adminPassword } from './environment.js';
+import { adminEmail, adminPassword, vercelBypassHeaders } from './environment.js';
 
 export interface E2EUser {
   id: string;
@@ -50,6 +50,13 @@ export interface VehicleFactory {
 
 /** Provides fresh API-authenticated user/admin sessions and cleans each test's vehicles. */
 export const test = base.extend<E2EFixtures>({
+  request: async ({ playwright, baseURL }, use) => {
+    const request = vercelBypassHeaders
+      ? await playwright.request.newContext({ baseURL, extraHTTPHeaders: vercelBypassHeaders })
+      : await playwright.request.newContext({ baseURL });
+    await use(request);
+    await request.dispose();
+  },
   admin: async ({ request }, use) => {
     const response = await request.post('/api/auth/login', {
       data: { email: adminEmail, password: adminPassword },

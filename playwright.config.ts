@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { env } from 'node:process';
-import './tests/e2e/fixtures/environment.js';
+import { vercelBypassHeaders } from './tests/e2e/fixtures/environment.js';
 
 const baseURL = env.BASE_URL ?? 'http://localhost:5173';
 
@@ -18,6 +18,7 @@ export default defineConfig({
   ],
   use: {
     baseURL,
+    ...(vercelBypassHeaders ? { extraHTTPHeaders: vercelBypassHeaders } : {}),
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

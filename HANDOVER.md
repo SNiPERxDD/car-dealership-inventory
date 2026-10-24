@@ -22,9 +22,22 @@
   initial inventory response overwriting search results, fixed by aborting superseded requests in
   `useVehicles`. README written. Final security review: no critical/high; two medium (no auth rate
   limiting, no security headers) await a scope decision, two low rejected (server-side stack logs,
-  404 echoes the caller's own path). Preview Supabase has demo inventory, no users.
-- Next: preview deploy and full run against it, production demo seeding (needs approval),
-  controlled production run, screenshots, `docs/test-report.md`, `PROMPTS.md`.
+  404 echoes the caller's own path). Preview deployment created (protected; Playwright sends the
+  automation bypass header in browser and API contexts). Preview has a promoted E2E admin;
+  production holds the 10-vehicle demo inventory, a demo admin and a demo user.
+- Next: full preview Playwright run, screenshots, controlled production verification (PRD
+  section 10; held for the owner's decision), `docs/test-report.md`, README demo credentials,
+  `PROMPTS.md`.
+
+## Proposals for the Owner (outside `PRD.md`, not implemented)
+- Security headers: add a `headers` block to `vercel.json` for all routes with
+  `Strict-Transport-Security: max-age=63072000; includeSubDomains`,
+  `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and a
+  CSP of `default-src 'self'; frame-ancestors 'none'; object-src 'none'` (fonts are self-hosted).
+  Cost: one config change plus a Playwright header assertion.
+- Auth rate limiting: a Vercel Firewall rate-limit rule on `POST /api/auth/login` and
+  `POST /api/auth/register` (for example 10 requests per minute per IP, then deny). No code change;
+  configured per project in the dashboard or via the Firewall API.
 
 ## Local Setup
 - `cp .env.example .env`, `npm run db:up` (postgres:16 on port 54329, `car_dev` + `car_test`),

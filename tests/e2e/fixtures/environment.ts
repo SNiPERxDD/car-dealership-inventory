@@ -24,3 +24,10 @@ export const adminPassword = requiredAdminSetting(
   'E2E_ADMIN_PASSWORD/ADMIN_PASSWORD',
 );
 export const jwtSecret = env.E2E_JWT_SECRET;
+
+export const vercelBypassHeaders = env.VERCEL_AUTOMATION_BYPASS_SECRET
+  ? {
+      'x-vercel-protection-bypass': env.VERCEL_AUTOMATION_BYPASS_SECRET,
+      'x-vercel-set-bypass-cookie': 'true',
+    }
+  : undefined;
