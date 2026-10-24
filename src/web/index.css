@@ -140,6 +140,14 @@ h1,
   margin: 0 auto;
   padding: 38px 0 64px;
 }
+.page-content.has-toast {
+  padding-bottom: 64px;
+}
+.page-content.has-toast .status-region {
+  position: static;
+  width: min(440px, 100%);
+  margin: 24px 0 0 auto;
+}
 .screen-heading {
   display: flex;
   align-items: end;
@@ -207,6 +215,71 @@ select {
   display: grid;
   gap: 8px;
   margin-top: 2px;
+}
+.price-range {
+  display: grid;
+  gap: 4px;
+}
+.price-range p {
+  margin: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  text-align: center;
+}
+.price-range-track {
+  position: relative;
+  height: 44px;
+  margin: 0 8px;
+}
+.price-range-track::before {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: var(--color-asphalt);
+  content: '';
+}
+.price-range-track input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.price-range-track input::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+}
+.price-range-track input::-moz-range-track {
+  height: 4px;
+  background: transparent;
+}
+.price-range-track input::-webkit-slider-thumb {
+  width: 24px;
+  height: 24px;
+  appearance: none;
+  margin-top: -10px;
+  border: 2px solid var(--color-asphalt);
+  border-radius: 50%;
+  background: var(--color-marker);
+  pointer-events: auto;
+}
+.price-range-track input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-asphalt);
+  border-radius: 50%;
+  background: var(--color-marker);
+  pointer-events: auto;
 }
 .primary-button,
 .secondary-button,
@@ -459,6 +532,7 @@ button:disabled {
 }
 .inventory-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
 }
@@ -504,6 +578,9 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+.row-actions.is-hidden {
+  display: none;
 }
 .row-actions button {
   min-height: 34px;
@@ -771,6 +848,13 @@ button:disabled {
     width: calc(100% - 32px);
     padding: 28px 0 48px;
   }
+  .page-content.has-toast {
+    padding-bottom: 48px;
+  }
+  .page-content.has-toast .status-region {
+    right: auto;
+    bottom: auto;
+  }
   .screen-heading {
     align-items: start;
     margin-bottom: 20px;
@@ -918,6 +1002,31 @@ button:disabled {
   .auth-panel-content {
     padding: 22px 20px 24px;
   }
+  button,
+  input,
+  select,
+  .filter-rail summary,
+  .main-tabs button,
+  .topbar-signout,
+  .primary-button,
+  .secondary-button,
+  .danger-button,
+  .quiet-button,
+  .auth-segment button {
+    min-height: 44px;
+  }
+  .row-actions button {
+    min-height: 44px;
+  }
+  .price-range-track input::-webkit-slider-thumb {
+    width: 44px;
+    height: 44px;
+    margin-top: -20px;
+  }
+  .price-range-track input::-moz-range-thumb {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 @media (max-width: 390px) {
@@ -956,7 +1065,7 @@ button:disabled {
     font-size: 38px;
   }
   .admin-heading .primary-button {
-    min-height: 38px;
+    min-height: 44px;
     font-size: 12px;
   }
 }

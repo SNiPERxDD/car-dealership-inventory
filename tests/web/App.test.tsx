@@ -230,7 +230,7 @@ describe('Northgate inventory application', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
     const noResults = screen
       .getByRole('heading', { name: 'No vehicles match these filters.' })
-      .closest('.empty-state');
+      .closest<HTMLElement>('.empty-state');
     await user.click(within(noResults!).getByRole('button', { name: 'Clear filters' }));
     expect(minimumField).toHaveValue(null);
     expect(maximumField).toHaveValue(null);
@@ -259,7 +259,7 @@ describe('Northgate inventory application', () => {
     ).toBeInTheDocument();
     const noResults = screen
       .getByRole('heading', { name: 'No vehicles match these filters.' })
-      .closest('.empty-state');
+      .closest<HTMLElement>('.empty-state');
     await user.click(within(noResults!).getByRole('button', { name: 'Clear filters' }));
 
     expect(await screen.findByRole('heading', { name: 'TRAIL' })).toBeInTheDocument();
@@ -391,7 +391,9 @@ describe('Northgate inventory application', () => {
     expect(apiCall(6).init.body).toBe(JSON.stringify({ quantity: 5 }));
 
     await user.click(await screen.findByRole('button', { name: 'Delete' }));
-    expect(screen.getByText('Delete Bolt? This removes it from the lot.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Delete Bolt Trail? This removes it from the lot.'),
+    ).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Delete vehicle' }));
     await waitFor(() => expect(apiCall(8).url.pathname).toBe(`/api/vehicles/${vehicle.id}`));
     expect(apiCall(8).init.method).toBe('DELETE');
@@ -404,7 +406,7 @@ describe('Northgate inventory application', () => {
       .mockResolvedValueOnce(response([vehicle]));
     const user = await signIn();
     await user.click(await screen.findByRole('button', { name: 'Manage stock' }));
-    const deleteButton = await screen.findByRole('button', { name: 'Delete', exact: true });
+    const deleteButton = await screen.findByRole('button', { name: /^Delete$/ });
     await user.click(deleteButton);
 
     expect(

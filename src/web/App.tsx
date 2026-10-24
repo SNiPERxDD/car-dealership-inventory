@@ -72,10 +72,13 @@ function SignedInApp({
           </div>
         </div>
       </header>
-      <main className="page-content">
+      <main className={`page-content${inventory.toast ? ' has-toast' : ''}`}>
         {showAdmin ? (
           <Admin
             vehicles={inventory.vehicles}
+            loading={inventory.loading}
+            loadError={inventory.loadError}
+            onRetry={inventory.reload}
             onCreate={inventory.create}
             onUpdate={inventory.update}
             onRestock={inventory.restock}
@@ -84,7 +87,16 @@ function SignedInApp({
         ) : (
           <Inventory
             vehicles={inventory.vehicles}
+            priceCeiling={
+              inventory.unfilteredVehicles.length
+                ? Math.ceil(
+                    Math.max(...inventory.unfilteredVehicles.map((vehicle) => vehicle.price)) /
+                      5000,
+                  ) * 5000
+                : 100_000
+            }
             loading={inventory.loading}
+            loadError={inventory.loadError}
             onSearch={inventory.search}
             onClear={inventory.reload}
             onPurchase={(vehicle) => void inventory.purchase(vehicle)}

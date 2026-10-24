@@ -101,7 +101,7 @@ test('confirms deletion inline and verifies the record is gone', async ({
   const row = page.getByRole('row').filter({ hasText: vehicle.model });
   await row.getByRole('button', { name: 'Delete', exact: true }).click();
   await expect(
-    row.getByText(`Delete ${vehicle.make}? This removes it from the lot.`),
+    row.getByText(`Delete ${vehicle.make} ${vehicle.model}? This removes it from the lot.`),
   ).toBeVisible();
   await row.getByRole('button', { name: 'Delete vehicle' }).click();
 

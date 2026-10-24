@@ -36,7 +36,9 @@ const COPY: Record<string, string> = {
 /** Loads and mutates inventory through the public vehicle API, refreshing after each mutation. */
 export function useVehicles(token: string, onUnauthorized: () => void) {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [unfilteredVehicles, setUnfilteredVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [toast, setToast] = useState('');
   const [toastError, setToastError] = useState(false);
   const requestController = useRef<AbortController | null>(null);
@@ -55,16 +57,25 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
       const controller = new AbortController();
       requestController.current?.abort();
       requestController.current = controller;
+      setLoading(true);
+      setLoadError('');
       try {
         const result = await apiRequest<Vehicle[]>(
           path,
           requestOptions({ signal: controller.signal }),
         );
-        if (!controller.signal.aborted) setVehicles(result);
+        if (!controller.signal.aborted) {
+          setVehicles(result);
+          if (path === '/api/vehicles') setUnfilteredVehicles(result);
+        }
       } catch (error) {
         if (!controller.signal.aborted) {
-          setToast(errorMessage(error));
-          setToastError(true);
+          if (!(error instanceof ApiError && error.status === 401)) {
+            const message = errorMessage(error);
+            setLoadError(message);
+            setToast(`Inventory request failed: ${message}`);
+            setToastError(true);
+          }
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -74,26 +85,15 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
   );
 
   useEffect(() => {
-    const controller = new AbortController();
-    requestController.current?.abort();
-    requestController.current = controller;
-    void apiRequest<Vehicle[]>('/api/vehicles', requestOptions({ signal: controller.signal }))
-      .then((result) => {
-        if (!controller.signal.aborted) setVehicles(result);
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted) {
-          setToast(errorMessage(error));
-          setToastError(true);
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
+    let active = true;
+    queueMicrotask(() => {
+      if (active) void load();
+    });
     return () => {
+      active = false;
       requestController.current?.abort();
     };
-  }, [requestOptions]);
+  }, [load]);
 
   const search = useCallback(
     (filters: VehicleFilters) => {
@@ -103,6 +103,7 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
         if (normalized) query.set(key, normalized);
       }
       setLoading(true);
+      setLoadError('');
       void load(`/api/vehicles/search${query.size ? `?${query.toString()}` : ''}`);
     },
     [load],
@@ -110,6 +111,7 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
 
   const reload = useCallback(() => {
     setLoading(true);
+    setLoadError('');
     void load();
   }, [load]);
 
@@ -191,6 +193,8 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
 
   return {
     vehicles,
+    unfilteredVehicles,
+    loadError,
     loading,
     toast,
     toastError,

@@ -53,7 +53,7 @@ export function Auth({ expired, onAuthenticate }: AuthProps) {
       <section className="auth-panel" aria-labelledby="auth-title">
         <div className="auth-panel-band" />
         <div className="auth-panel-content">
-          <p className="section-kicker">Staff access</p>
+          <p className="section-kicker">Buyers and staff</p>
           <h1 id="auth-title">{mode === 'login' ? 'Sign in' : 'Create account'}</h1>
           <div className="auth-segment" role="group" aria-label="Account access">
             <button

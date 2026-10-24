@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Vehicle, VehicleFields } from '../hooks/useVehicles';
 import { ConfirmDelete } from '../components/ConfirmDelete';
 import { RestockDialog } from '../components/RestockDialog';
@@ -8,6 +8,9 @@ import { formatPrice } from '../components/VehicleSticker';
 
 interface AdminProps {
   vehicles: Vehicle[];
+  loading: boolean;
+  loadError: string;
+  onRetry: () => void;
   onCreate: (fields: VehicleFields) => Promise<string | null>;
   onUpdate: (id: string, fields: VehicleFields) => Promise<string | null>;
   onRestock: (vehicle: Vehicle, quantity: number) => Promise<string | null>;
@@ -15,10 +18,28 @@ interface AdminProps {
 }
 
 /** Renders the manager's responsive stock table and vehicle management dialogs. */
-export function Admin({ vehicles, onCreate, onUpdate, onRestock, onDelete }: AdminProps) {
+export function Admin({
+  vehicles,
+  loading,
+  loadError,
+  onRetry,
+  onCreate,
+  onUpdate,
+  onRestock,
+  onDelete,
+}: AdminProps) {
   const [vehicleForm, setVehicleForm] = useState<Vehicle | 'new' | null>(null);
   const [restockVehicle, setRestockVehicle] = useState<Vehicle | null>(null);
   const [confirmingId, setConfirmingId] = useState('');
+  const deleteButtonsRef = useRef(new Map<string, HTMLButtonElement>());
+  const previousConfirmingId = useRef('');
+
+  useEffect(() => {
+    if (previousConfirmingId.current && !confirmingId) {
+      deleteButtonsRef.current.get(previousConfirmingId.current)?.focus();
+    }
+    previousConfirmingId.current = confirmingId;
+  }, [confirmingId]);
 
   /** Routes the shared dialog payload to the create or replacement endpoint. */
   const saveVehicle = (fields: VehicleFields) =>
@@ -40,7 +61,19 @@ export function Admin({ vehicles, onCreate, onUpdate, onRestock, onDelete }: Adm
           Add vehicle
         </button>
       </div>
-      {vehicles.length === 0 ? (
+      {loadError ? (
+        <div className="empty-state inventory-error" role="alert">
+          <h2>Inventory could not load.</h2>
+          <p>{loadError}</p>
+          <button className="secondary-button" type="button" onClick={onRetry}>
+            Try again
+          </button>
+        </div>
+      ) : loading ? (
+        <div className="empty-state" aria-busy="true">
+          Loading inventory…
+        </div>
+      ) : vehicles.length === 0 ? (
         <div className="empty-state admin-empty">
           <h2>The lot is empty. Add the first vehicle.</h2>
         </div>
@@ -72,36 +105,42 @@ export function Admin({ vehicles, onCreate, onUpdate, onRestock, onDelete }: Adm
                     <StockOdometer quantity={vehicle.quantity} compact />
                   </td>
                   <td data-label="Actions">
-                    {confirmingId === vehicle.id ? (
+                    <div
+                      className={`row-actions${confirmingId === vehicle.id ? ' is-hidden' : ''}`}
+                    >
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={() => setVehicleForm(vehicle)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={() => setRestockVehicle(vehicle)}
+                      >
+                        Restock
+                      </button>
+                      <button
+                        className="danger-button"
+                        type="button"
+                        ref={(element) => {
+                          if (element) deleteButtonsRef.current.set(vehicle.id, element);
+                          else deleteButtonsRef.current.delete(vehicle.id);
+                        }}
+                        onClick={() => setConfirmingId(vehicle.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                    {confirmingId === vehicle.id && (
                       <ConfirmDelete
                         make={vehicle.make}
+                        model={vehicle.model}
                         onDelete={() => void removeVehicle(vehicle)}
                         onCancel={() => setConfirmingId('')}
                       />
-                    ) : (
-                      <div className="row-actions">
-                        <button
-                          className="secondary-button"
-                          type="button"
-                          onClick={() => setVehicleForm(vehicle)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="secondary-button"
-                          type="button"
-                          onClick={() => setRestockVehicle(vehicle)}
-                        >
-                          Restock
-                        </button>
-                        <button
-                          className="danger-button"
-                          type="button"
-                          onClick={() => setConfirmingId(vehicle.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
                     )}
                   </td>
                 </tr>

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { test, expect, openAuthenticated, signInThroughForm } from './fixtures/index.js';
+import { test, expect, openAuthenticated } from './fixtures/index.js';
 
 /** Expands the mobile-only filter disclosure when it is visible. */
 async function openFiltersIfCollapsed(page: import('@playwright/test').Page): Promise<void> {
@@ -31,8 +31,8 @@ test('filters by a price range', async ({ page, admin, vehicles }) => {
   const vehicle = await vehicles.create({ price: 67890.12 });
   await openAuthenticated(page, admin);
   await openFiltersIfCollapsed(page);
-  await page.getByLabel('Minimum price').fill('67000');
-  await page.getByLabel('Maximum price').fill('68000');
+  await page.getByRole('spinbutton', { name: 'Minimum price' }).fill('67000');
+  await page.getByRole('spinbutton', { name: 'Maximum price' }).fill('68000');
   await page.getByRole('button', { name: 'Search' }).click();
 
   await expect(page.locator('.vehicle-sticker').filter({ hasText: vehicle.model })).toBeVisible();
@@ -103,7 +103,7 @@ test('visible inventory, auth, and admin controls are at least 44px tall on mobi
   admin,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const assertTapTargets = async () => {
+  const assertTapTargets = async (hasSliders = false) => {
     const shortTargets = await page
       .locator('button:visible, input:visible, select:visible, summary:visible')
       .evaluateAll((elements) =>
@@ -119,27 +119,31 @@ test('visible inventory, auth, and admin controls are at least 44px tall on mobi
       );
     expect(shortTargets).toEqual([]);
 
-    const sliders = page.getByRole('slider');
-    await expect(sliders).toHaveCount(2);
-    const shortThumbs = await sliders.evaluateAll((elements) =>
-      elements
-        .map((element) =>
-          Number.parseFloat(getComputedStyle(element, '::-webkit-slider-thumb').height),
-        )
-        .filter((height) => height < 44),
-    );
-    expect(shortThumbs).toEqual([]);
+    if (hasSliders) {
+      const sliders = page.getByRole('slider');
+      await expect(sliders).toHaveCount(2);
+      const shortThumbs = await sliders.evaluateAll((elements) =>
+        elements
+          .map((element) =>
+            Number.parseFloat(getComputedStyle(element, '::-webkit-slider-thumb').height),
+          )
+          .filter((height) => height < 44),
+      );
+      expect(shortThumbs).toEqual([]);
+    }
   };
 
   await openAuthenticated(page, user);
   await openFiltersIfCollapsed(page);
-  await assertTapTargets();
+  await assertTapTargets(true);
 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   await assertTapTargets();
 
-  await signInThroughForm(page, admin.email, admin.password);
+  await page.getByLabel('Email').fill(admin.email);
+  await page.getByLabel('Password').fill(admin.password);
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await page.getByRole('button', { name: 'Manage stock' }).click();
   await expect(page.getByRole('heading', { name: 'Manage stock' })).toBeVisible();
   await assertTapTargets();
@@ -154,6 +158,7 @@ test('delete confirmation preserves column widths at 1280px', async ({ page, adm
     .getByRole('row')
     .filter({ has: page.getByRole('button', { name: 'Delete' }) })
     .last();
+  await expect(row).toBeVisible();
   const widthsBefore = await row
     .locator('td')
     .evaluateAll((cells) => cells.map((cell) => cell.getBoundingClientRect().width));

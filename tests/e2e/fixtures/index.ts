@@ -141,7 +141,7 @@ export async function openAuthenticated(page: Page, session: E2ESession): Promis
     { token: session.token, user: session.user },
   );
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Inventory' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Inventory', exact: true })).toBeVisible();
 }
 
 /** Signs in through the visible authentication form. */
@@ -154,7 +154,7 @@ export async function signInThroughForm(
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Inventory' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Inventory', exact: true })).toBeVisible();
 }
 
 /** Lists vehicles with the supplied token and returns a fixture record by identifier. */
