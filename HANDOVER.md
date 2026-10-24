@@ -30,6 +30,15 @@
   Controlled production run (owner-approved, fixture-only tests, chromium-desktop): 10 passed;
   demo inventory unchanged (10 vehicles, 38 units). Fixture users were removed from preview and
   production afterwards (`delete from users where role = 'user' and email like '%@example.test'`).
+- Audit screenshot set captured from the protected preview: 42 full-page PNGs in
+  `_experiments/audit-shots/`, covering signed-out, user, and admin states at 1280 and 390 px.
+  Temporary audit vehicles and users were removed; preview inventory remains 10 vehicles/38 units.
+- PM and UI/UX audits of that set fixed: load-error state with retry (inventory and stock),
+  two-thumb price range, delete confirmation focus/Escape/stable columns, 44 px mobile controls,
+  toast no longer covers content, auth kicker "Buyers and staff"; 154 unit and 70 e2e tests pass.
+  Rejected as false positives: Price/Stock header collision, FilterRail SSR, admin empty-state
+  button. Not done (owner decision): derive the displayed role from the JWT instead of the
+  cached session; the server already enforces admin routes. The fixes are not yet redeployed.
 - Next (owner): complete `PROMPTS.md` with the redacted raw transcripts (PRD "PROMPTS.md" rule).
 - Fixture users are never deleted by the Playwright teardown (no delete-user route); each
   deployed run leaves `@example.test` accounts behind.
