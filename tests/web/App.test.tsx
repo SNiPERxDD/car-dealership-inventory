@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../../src/web/App';
@@ -139,13 +139,131 @@ describe('Northgate inventory application', () => {
       .mockResolvedValueOnce(response([vehicle]));
     const user = await signIn();
     await user.type(screen.getByLabelText('Make'), 'Bolt');
-    await user.type(screen.getByLabelText('Minimum price'), '20000');
+    await user.type(screen.getByRole('spinbutton', { name: 'Minimum price' }), '20000');
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(apiCall(2).url.pathname).toBe('/api/vehicles/search'));
     expect(apiCall(2).url.search).toBe('?make=Bolt&minPrice=20000');
     await user.click(screen.getByRole('button', { name: 'Clear filters' }));
     await waitFor(() => expect(apiCall(3).url.pathname).toBe('/api/vehicles'));
+  });
+
+  it('shows inventory load errors and retries the unfiltered listing', async () => {
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockResolvedValueOnce(
+        response(
+          { error: { code: 'INTERNAL_ERROR', message: 'Inventory service unavailable' } },
+          503,
+        ),
+      )
+      .mockResolvedValueOnce(response([vehicle]));
+    const user = await signIn();
+
+    expect(
+      await screen.findByRole('heading', { name: 'Inventory could not load.' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Inventory service unavailable')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Inventory service unavailable');
+    expect(screen.queryByText(/vehicles? listed/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(await screen.findByRole('heading', { name: 'TRAIL' })).toBeInTheDocument();
+    expect(screen.getByText('1 vehicle listed')).toBeInTheDocument();
+    expect(apiCall(2).url.pathname).toBe('/api/vehicles');
+  });
+
+  it('shows an admin inventory error instead of the empty lot and retries', async () => {
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult('admin')))
+      .mockResolvedValueOnce(
+        response({ error: { code: 'INTERNAL_ERROR', message: 'Stock listing unavailable' } }, 500),
+      )
+      .mockResolvedValueOnce(response([vehicle]));
+    const user = await signIn();
+    await user.click(await screen.findByRole('button', { name: 'Manage stock' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Inventory could not load.' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Stock listing unavailable')).toBeInTheDocument();
+    expect(screen.queryByText('The lot is empty. Add the first vehicle.')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(await screen.findByRole('row', { name: /Bolt Trail/ })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Inventory could not load.' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('synchronizes the price range sliders with fields and clears both', async () => {
+    const higherPricedVehicle = { ...vehicle, id: 'higher-priced', price: 42200 };
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockResolvedValueOnce(response([vehicle, higherPricedVehicle]))
+      .mockResolvedValueOnce(response([]));
+    const user = await signIn();
+
+    const minimumSlider = screen.getByRole('slider', { name: 'Minimum price' });
+    const maximumSlider = screen.getByRole('slider', { name: 'Maximum price' });
+    expect(minimumSlider).toHaveAttribute('min', '0');
+    expect(minimumSlider).toHaveAttribute('max', '45000');
+    expect(minimumSlider).toHaveAttribute('step', '500');
+    expect(maximumSlider).toHaveAttribute('max', '45000');
+    expect(maximumSlider).toHaveAttribute('step', '500');
+
+    const minimumField = screen.getByRole('spinbutton', { name: 'Minimum price' });
+    const maximumField = screen.getByRole('spinbutton', { name: 'Maximum price' });
+    await user.clear(minimumField);
+    await user.type(minimumField, '10000');
+    expect(minimumSlider).toHaveValue('10000');
+
+    fireEvent.change(maximumSlider, { target: { value: '20000' } });
+    expect(maximumField).toHaveValue(20000);
+    fireEvent.change(minimumSlider, { target: { value: '25000' } });
+    expect(Number((minimumSlider as HTMLInputElement).value)).toBeLessThanOrEqual(
+      Number((maximumSlider as HTMLInputElement).value),
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+    const noResults = screen
+      .getByRole('heading', { name: 'No vehicles match these filters.' })
+      .closest('.empty-state');
+    await user.click(within(noResults!).getByRole('button', { name: 'Clear filters' }));
+    expect(minimumField).toHaveValue(null);
+    expect(maximumField).toHaveValue(null);
+    expect(minimumSlider).toHaveValue('0');
+    expect(maximumSlider).toHaveValue('45000');
+  });
+
+  it('names buyers and staff on the authentication screen', () => {
+    render(<App />);
+
+    expect(screen.getByText('Buyers and staff')).toBeInTheDocument();
+  });
+
+  it('shows no-match search results and Clear filters restores the lot', async () => {
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockResolvedValueOnce(response([vehicle]))
+      .mockResolvedValueOnce(response([]))
+      .mockResolvedValueOnce(response([vehicle]));
+    const user = await signIn();
+    await user.type(screen.getByLabelText('Make'), 'No matching make');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'No vehicles match these filters.' }),
+    ).toBeInTheDocument();
+    const noResults = screen
+      .getByRole('heading', { name: 'No vehicles match these filters.' })
+      .closest('.empty-state');
+    await user.click(within(noResults!).getByRole('button', { name: 'Clear filters' }));
+
+    expect(await screen.findByRole('heading', { name: 'TRAIL' })).toBeInTheDocument();
+    expect(apiCall(3).url.pathname).toBe('/api/vehicles');
   });
 
   it('keeps search results when the initial inventory response arrives late', async () => {
@@ -278,6 +396,31 @@ describe('Northgate inventory application', () => {
     await waitFor(() => expect(apiCall(8).url.pathname).toBe(`/api/vehicles/${vehicle.id}`));
     expect(apiCall(8).init.method).toBe('DELETE');
     expect(apiCall(8).init.body).toBeUndefined();
+  });
+
+  it('focuses Keep on delete confirmation and Escape restores focus to Delete', async () => {
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult('admin')))
+      .mockResolvedValueOnce(response([vehicle]));
+    const user = await signIn();
+    await user.click(await screen.findByRole('button', { name: 'Manage stock' }));
+    const deleteButton = await screen.findByRole('button', { name: 'Delete', exact: true });
+    await user.click(deleteButton);
+
+    expect(
+      screen.getByRole('group', { name: 'Confirm deletion of Bolt Trail' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Delete Bolt Trail? This removes it from the lot.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Keep' })).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+
+    expect(
+      screen.queryByRole('group', { name: 'Confirm deletion of Bolt Trail' }),
+    ).not.toBeInTheDocument();
+    expect(deleteButton).toHaveFocus();
   });
 
   it('clears an expired session and returns to sign-in with the expiry message', async () => {
