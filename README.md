@@ -78,7 +78,12 @@ The project has unit tests for validation and service rules, PostgreSQL integrat
 
 ## Demo accounts
 
-Demo admin and user credentials for the production demo are added at submission.
+| Role  | Email                       | Password             |
+| ----- | --------------------------- | -------------------- |
+| admin | `admin@northgate-demo.test` | `Admin-f1f1740f26f0` |
+| user  | `user@northgate-demo.test`  | `User-af035bd25c01`  |
+
+Demo data only; credentials are for review.
 
 ## Git history
 
