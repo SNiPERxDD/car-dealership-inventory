@@ -27,11 +27,14 @@
   production holds the 10-vehicle demo inventory, a demo admin and a demo user.
   Preview Playwright run: 60 passed, 2 expected expired-token skips. Screenshots, README demo
   credentials and `docs/test-report.md` are committed.
-- Next (owner): decide on the controlled production verification (PRD section 10; not run, the
-  agent permission check classed it as a shared-resource change), complete `PROMPTS.md` with the
-  redacted raw transcripts (PRD "PROMPTS.md" rule), and delete the 28 leftover fixture users
-  (`role = 'user'`, `@example.test`) on the preview database; the MCP write failed with
-  "Invalid or expired requestState".
+  Controlled production run (owner-approved, fixture-only tests, chromium-desktop): 10 passed;
+  demo inventory unchanged (10 vehicles, 38 units). Preview fixture users were removed.
+- Next (owner): complete `PROMPTS.md` with the redacted raw transcripts (PRD "PROMPTS.md" rule);
+  delete the 6 fixture users left in production
+  (`delete from users where role = 'user' and email like '%@example.test'`), which the agent
+  permission check blocked as a production delete.
+- Fixture users are never deleted by the Playwright teardown (no delete-user route); each
+  deployed run leaves `@example.test` accounts behind.
 
 ## Proposals for the Owner (outside `PRD.md`, not implemented)
 - Security headers: add a `headers` block to `vercel.json` for all routes with

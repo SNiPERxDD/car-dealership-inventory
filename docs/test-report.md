@@ -24,4 +24,18 @@ Latest run on `main`: CI run 40045278009.
 
 ## Production
 
-Controlled verification described in PRD section 10 is pending the owner's approval.
+Controlled verification completed on 2026-10-24 against [the production deployment](https://car-dealership-inventory-phi.vercel.app), deployed from commit 514587b.
+
+- Result: 10 passed, 0 failed, 0 skipped; chromium-desktop.
+- Fixture vehicles: all removed successfully by teardown.
+- Tests run:
+  - logs in through the form and logout clears both stored session values
+  - lists the isolated fixture vehicle
+  - searches by make, model, and category
+  - user tokens cannot create, update, delete, or restock vehicles
+  - unexpected id and purchase quantity fields are rejected without changing inventory
+  - blocks invalid price and quantity in the client and shows server validation errors
+  - zero-stock stickers disable purchase and say out of stock
+  - maps an out-of-stock conflict to clear purchase copy
+  - purchase decrements the stock odometer and shows a success message
+  - restocks a vehicle and verifies the new quantity through the API
