@@ -25,9 +25,13 @@
   404 echoes the caller's own path). Preview deployment created (protected; Playwright sends the
   automation bypass header in browser and API contexts). Preview has a promoted E2E admin;
   production holds the 10-vehicle demo inventory, a demo admin and a demo user.
-- Next: full preview Playwright run, screenshots, controlled production verification (PRD
-  section 10; held for the owner's decision), `docs/test-report.md`, README demo credentials,
-  `PROMPTS.md`.
+  Preview Playwright run: 60 passed, 2 expected expired-token skips. Screenshots, README demo
+  credentials and `docs/test-report.md` are committed.
+- Next (owner): decide on the controlled production verification (PRD section 10; not run, the
+  agent permission check classed it as a shared-resource change), complete `PROMPTS.md` with the
+  redacted raw transcripts (PRD "PROMPTS.md" rule), and delete the 28 leftover fixture users
+  (`role = 'user'`, `@example.test`) on the preview database; the MCP write failed with
+  "Invalid or expired requestState".
 
 ## Proposals for the Owner (outside `PRD.md`, not implemented)
 - Security headers: add a `headers` block to `vercel.json` for all routes with
