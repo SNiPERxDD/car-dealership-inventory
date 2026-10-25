@@ -105,4 +105,4 @@ AI assisted with implementation, tests, debugging, reviews, and documentation. W
 
 ### Reflection
 
-[Owner: add your own reflection on how AI affected your workflow and what you learned.]
+I treated AI as a team rather than a single assistant: one lead model planned and reviewed, while separate lanes implemented and independently reviewed each slice. The biggest lesson was that output quality tracked brief quality. When I prompted the UI/UX audit too loosely, it missed an obvious gap (no min/max price slider). Precise briefs that cited requirements caught real defects: a lost-update on edit, 500s from malformed bodies and NUL bytes, and broken table semantics on mobile WebKit. Strong models made it tempting to skip process, so I kept TDD where it gives verifiable evidence: separate RED and GREEN commits and behavioural tests. I also audited everything public for leaked identifiers before it left the machine, since a force push can't fully take back a leak.
