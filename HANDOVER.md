@@ -39,6 +39,15 @@
   Rejected as false positives: Price/Stock header collision, FilterRail SSR, admin empty-state
   button. Not done (owner decision): derive the displayed role from the JWT instead of the
   cached session; the server already enforces admin routes. Live on production (auto-deploy from `main`).
+- Visual redesign: brand system (deep green, brass, paper), photographic sign-in hero, CSS-rendered
+  body-type art and a sold stamp on each window sticker, admin stock ledger (models, units on hand,
+  awaiting restock, stock value), stock cards instead of the table below 1024 px (two columns on
+  tablet), and each screen opens at the top. 154 unit and 70 e2e tests pass; checked at 1280,
+  1024, 834 and 393 px. `docs/screenshots/` predates it.
+- Redesign review fixes: explicit responsive table roles, vehicle-specific Purchase labels with an
+  in-flight guard, 6.81:1 auth segment text contrast, remembered search path, unfiltered admin
+  inventory, and filter state preserved across screen changes. 158 unit tests and 70 Playwright
+  tests pass; typecheck, lint, build, and Prettier pass.
 - Next (owner): complete `PROMPTS.md` with the redacted raw transcripts (PRD "PROMPTS.md" rule).
 - Fixture users are never deleted by the Playwright teardown (no delete-user route); each
   deployed run leaves `@example.test` accounts behind.
@@ -137,3 +146,8 @@
 - Never run two lanes' `vitest` at once: they share `car_test` and corrupt each other's
   row counts (seen as a spurious `auth.test.ts` failure). Serialize test runs across lanes.
 - The rtk proxy cannot parse vitest output; use `rtk proxy npx vitest run` to see results.
+- Visible copy is part of the test contract: unit and e2e tests match exact texts and heading
+  names (for example a unique "Out of stock"); grep `tests/` before renaming or adding UI text.
+- Purchase aria labels containing a vehicle model can match Playwright form labels by substring;
+  use exact label matching for the model input.
+- Playwright `page.mouse.wheel` hangs in mobile WebKit; scroll with `window.scrollTo` instead.

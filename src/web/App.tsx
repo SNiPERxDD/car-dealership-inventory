@@ -31,6 +31,26 @@ function SignedInApp({
   const isAdmin = session.user.role === 'admin';
   const showAdmin = isAdmin && screen === 'admin';
 
+  /** Restores the current inventory results when returning from stock management. */
+  const openInventory = () => {
+    if (screen === 'inventory') return;
+    setScreen('inventory');
+    if (inventory.searchActive) inventory.search(inventory.filters);
+    else inventory.reload();
+  };
+
+  /** Loads the full list before showing stock management after a filtered search. */
+  const openAdmin = () => {
+    if (screen === 'admin') return;
+    setScreen('admin');
+    if (inventory.searchActive) void inventory.loadAll();
+  };
+
+  // Each screen opens at the top instead of inheriting the previous screen's scroll offset.
+  useLayoutEffect(() => {
+    if (window.scrollY > 0) window.scrollTo(0, 0);
+  }, [screen]);
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -40,7 +60,7 @@ function SignedInApp({
             href="#inventory"
             onClick={(event) => {
               event.preventDefault();
-              setScreen('inventory');
+              openInventory();
             }}
           >
             <span className="wordmark">Northgate Motors</span>
@@ -50,7 +70,7 @@ function SignedInApp({
             <button
               type="button"
               aria-current={!showAdmin ? 'page' : undefined}
-              onClick={() => setScreen('inventory')}
+              onClick={openInventory}
             >
               Inventory
             </button>
@@ -58,7 +78,7 @@ function SignedInApp({
               <button
                 type="button"
                 aria-current={showAdmin ? 'page' : undefined}
-                onClick={() => setScreen('admin')}
+                onClick={openAdmin}
               >
                 Manage stock
               </button>
@@ -75,7 +95,7 @@ function SignedInApp({
       <main className={`page-content${inventory.toast ? ' has-toast' : ''}`}>
         {showAdmin ? (
           <Admin
-            vehicles={inventory.vehicles}
+            vehicles={inventory.unfilteredVehicles}
             loading={inventory.loading}
             loadError={inventory.loadError}
             onRetry={inventory.reload}
@@ -87,6 +107,8 @@ function SignedInApp({
         ) : (
           <Inventory
             vehicles={inventory.vehicles}
+            filters={inventory.filters}
+            searchActive={inventory.searchActive}
             priceCeiling={
               inventory.unfilteredVehicles.length
                 ? Math.ceil(
@@ -98,8 +120,9 @@ function SignedInApp({
             loading={inventory.loading}
             loadError={inventory.loadError}
             onSearch={inventory.search}
-            onClear={inventory.reload}
-            onPurchase={(vehicle) => void inventory.purchase(vehicle)}
+            onFiltersChange={inventory.updateFilters}
+            onClear={inventory.clearSearch}
+            onPurchase={inventory.purchase}
           />
         )}
         <StatusRegion
@@ -111,4 +134,4 @@ function SignedInApp({
     </div>
   );
 }
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';

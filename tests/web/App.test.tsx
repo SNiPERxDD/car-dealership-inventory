@@ -127,7 +127,7 @@ describe('Northgate inventory application', () => {
     await signIn();
 
     expect(await screen.findByText('Trail')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Purchase' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Purchase Bolt Trail' })).toBeDisabled();
     expect(screen.getByText('Out of stock')).toBeInTheDocument();
   });
 
@@ -146,6 +146,65 @@ describe('Northgate inventory application', () => {
     expect(apiCall(2).url.search).toBe('?make=Bolt&minPrice=20000');
     await user.click(screen.getByRole('button', { name: 'Clear filters' }));
     await waitFor(() => expect(apiCall(3).url.pathname).toBe('/api/vehicles'));
+  });
+
+  it('keeps search filters and results after a purchase', async () => {
+    const otherVehicle = { ...vehicle, id: 'other', make: 'Rover', model: 'Range' };
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockResolvedValueOnce(response([vehicle, otherVehicle]))
+      .mockResolvedValueOnce(response([vehicle]))
+      .mockResolvedValueOnce(response({ ...vehicle, quantity: 2 }))
+      .mockResolvedValueOnce(response([{ ...vehicle, quantity: 2 }]));
+    const user = await signIn();
+    await user.type(screen.getByLabelText('Make'), 'Bolt');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+    await user.click(await screen.findByRole('button', { name: 'Purchase Bolt Trail' }));
+
+    expect(await screen.findByText('Purchased 1 × Bolt Trail.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Make')).toHaveValue('Bolt');
+    expect(await screen.findByRole('heading', { name: 'TRAIL' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'RANGE' })).not.toBeInTheDocument();
+    expect(apiCall(4).url.pathname).toBe('/api/vehicles/search');
+    expect(apiCall(4).url.search).toBe('?make=Bolt');
+  });
+
+  it('preserves active filters while showing all inventory in Manage stock', async () => {
+    const otherVehicle = { ...vehicle, id: 'other', make: 'Rover', model: 'Range' };
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult('admin')))
+      .mockResolvedValueOnce(response([vehicle, otherVehicle]))
+      .mockResolvedValueOnce(response([vehicle]))
+      .mockResolvedValueOnce(response([vehicle, otherVehicle]))
+      .mockResolvedValueOnce(response([vehicle]));
+    const user = await signIn();
+    await user.type(screen.getByLabelText('Make'), 'Bolt');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+    await user.click(screen.getByRole('button', { name: 'Manage stock' }));
+
+    expect(await screen.findByRole('row', { name: /Rover Range/ })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Inventory' }));
+
+    expect(screen.getByLabelText('Make')).toHaveValue('Bolt');
+    expect(await screen.findByRole('heading', { name: 'TRAIL' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'RANGE' })).not.toBeInTheDocument();
+    expect(apiCall(4).url.pathname).toBe('/api/vehicles/search');
+    expect(apiCall(4).url.search).toBe('?make=Bolt');
+  });
+
+  it('exposes admin table rows and cells with explicit table roles', async () => {
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult('admin')))
+      .mockResolvedValueOnce(response([vehicle]));
+    const user = await signIn();
+    await user.click(await screen.findByRole('button', { name: 'Manage stock' }));
+
+    const table = screen.getByRole('table');
+    expect(table).toHaveAttribute('role', 'table');
+    expect(within(table).getAllByRole('rowgroup')).toHaveLength(2);
+    expect(within(table).getAllByRole('row')[0]).toHaveAttribute('role', 'row');
+    expect(within(table).getAllByRole('columnheader')).toHaveLength(6);
+    expect(within(table).getAllByRole('cell').length).toBeGreaterThan(0);
   });
 
   it('shows inventory load errors and retries the unfiltered listing', async () => {
@@ -300,7 +359,7 @@ describe('Northgate inventory application', () => {
       .mockResolvedValueOnce(response({ ...vehicle, quantity: 2 }))
       .mockResolvedValueOnce(response([{ ...vehicle, quantity: 2 }]));
     const user = await signIn();
-    await user.click(await screen.findByRole('button', { name: 'Purchase' }));
+    await user.click(await screen.findByRole('button', { name: 'Purchase Bolt Trail' }));
 
     expect(await screen.findByText('Purchased 1 × Bolt Trail.')).toBeInTheDocument();
     expect(screen.getByText('002')).toBeInTheDocument();
@@ -318,12 +377,38 @@ describe('Northgate inventory application', () => {
       )
       .mockResolvedValueOnce(response([{ ...vehicle, quantity: 0 }]));
     const user = await signIn();
-    await user.click(await screen.findByRole('button', { name: 'Purchase' }));
+    await user.click(await screen.findByRole('button', { name: 'Purchase Bolt Trail' }));
 
     expect(
       await screen.findByText('None left in stock. The listing has been refreshed.'),
     ).toBeInTheDocument();
     await waitFor(() => expect(apiCall(3).url.pathname).toBe('/api/vehicles'));
+  });
+
+  it('sends one purchase request for two quick clicks', async () => {
+    let resolvePurchase!: (result: Response) => void;
+    fetchMock()
+      .mockResolvedValueOnce(response(authResult()))
+      .mockResolvedValueOnce(response([vehicle]))
+      .mockImplementationOnce(
+        () =>
+          new Promise<Response>((resolve) => {
+            resolvePurchase = resolve;
+          }),
+      )
+      .mockResolvedValueOnce(response([{ ...vehicle, quantity: 2 }]));
+    const user = await signIn();
+    const purchaseButton = await screen.findByRole('button', { name: 'Purchase Bolt Trail' });
+
+    await user.dblClick(purchaseButton);
+
+    expect(purchaseButton).toBeDisabled();
+    expect(
+      fetchMock().mock.calls.filter(([input]) => String(input).includes('/purchase')),
+    ).toHaveLength(1);
+
+    resolvePurchase(response({ ...vehicle, quantity: 2 }));
+    expect(await screen.findByText('Purchased 1 × Bolt Trail.')).toBeInTheDocument();
   });
 
   it('hides stock management from regular users and shows it to admins', async () => {

@@ -43,7 +43,10 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
   const [loadError, setLoadError] = useState('');
   const [toast, setToast] = useState('');
   const [toastError, setToastError] = useState(false);
+  const [filters, setFilters] = useState<VehicleFilters>({});
+  const [searchActive, setSearchActive] = useState(false);
   const requestController = useRef<AbortController | null>(null);
+  const lastListPath = useRef('/api/vehicles');
 
   const requestOptions = useCallback(
     (options: ApiRequestOptions = {}): ApiRequestOptions => ({
@@ -55,7 +58,8 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
   );
 
   const load = useCallback(
-    async (path = '/api/vehicles') => {
+    async (path = lastListPath.current) => {
+      lastListPath.current = path;
       const controller = new AbortController();
       requestController.current?.abort();
       requestController.current = controller;
@@ -99,6 +103,8 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
 
   const search = useCallback(
     (filters: VehicleFilters) => {
+      setFilters(filters);
+      setSearchActive(true);
       const query = new URLSearchParams();
       for (const [key, value] of Object.entries(filters)) {
         const normalized = value?.trim();
@@ -111,11 +117,23 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
     [load],
   );
 
+  const updateFilters = useCallback((nextFilters: VehicleFilters) => {
+    setFilters(nextFilters);
+  }, []);
+
   const reload = useCallback(() => {
     setLoading(true);
     setLoadError('');
     void load();
   }, [load]);
+
+  const clearSearch = useCallback(() => {
+    setFilters({});
+    setSearchActive(false);
+    void load('/api/vehicles');
+  }, [load]);
+
+  const loadAll = useCallback(() => load('/api/vehicles'), [load]);
 
   const mutate = useCallback(
     async <Result>(
@@ -196,13 +214,18 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
   return {
     vehicles,
     unfilteredVehicles,
+    filters,
+    searchActive,
     loadError,
     loading,
     toast,
     toastError,
     setToast,
     reload,
+    clearSearch,
+    loadAll,
     search,
+    updateFilters,
     purchase,
     create,
     update,

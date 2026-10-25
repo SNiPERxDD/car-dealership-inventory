@@ -7,7 +7,7 @@ interface AuthProps {
   onAuthenticate: (mode: 'login' | 'register', email: string, password: string) => Promise<void>;
 }
 
-/** Presents the sign-in and registration forms inside the dealer's sticker-shaped panel. */
+/** Presents the sign-in and registration forms beside the dealership forecourt hero. */
 export function Auth({ expired, onAuthenticate }: AuthProps) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [error, setError] = useState('');
@@ -49,9 +49,12 @@ export function Auth({ expired, onAuthenticate }: AuthProps) {
       <div className="auth-brand">
         <p className="wordmark">Northgate Motors</p>
         <p className="brand-caption">Lot inventory</p>
+        <p className="auth-tagline">
+          Your next car is <span>already on the lot.</span>
+        </p>
+        <p className="auth-note">Buyers browse and purchase. Staff restock and manage the lot.</p>
       </div>
       <section className="auth-panel" aria-labelledby="auth-title">
-        <div className="auth-panel-band" />
         <div className="auth-panel-content">
           <p className="section-kicker">Buyers and staff</p>
           <h1 id="auth-title">{mode === 'login' ? 'Sign in' : 'Create account'}</h1>

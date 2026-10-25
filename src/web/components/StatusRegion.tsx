@@ -9,7 +9,11 @@ export function StatusRegion({ message, tone, onDismiss }: StatusRegionProps) {
   return (
     <div className="status-region" aria-live="polite" aria-atomic="true">
       {message && (
-        <div className={`status-message${tone === 'error' ? ' is-error' : ''}`} role="status">
+        <div
+          key={message}
+          className={`status-message${tone === 'error' ? ' is-error' : ''}`}
+          role="status"
+        >
           <span>{message}</span>
           {onDismiss && (
             <button

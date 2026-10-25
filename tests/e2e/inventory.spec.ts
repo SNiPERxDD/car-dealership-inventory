@@ -19,7 +19,7 @@ test('searches by make, model, and category', async ({ page, admin, vehicles }) 
   await openAuthenticated(page, admin);
   await openFiltersIfCollapsed(page);
   await page.getByLabel('Make').fill(vehicle.make);
-  await page.getByLabel('Model').fill(vehicle.model);
+  await page.getByLabel('Model', { exact: true }).fill(vehicle.model);
   await page.getByLabel('Category').fill(vehicle.category);
   await page.getByRole('button', { name: 'Search' }).click();
 
@@ -63,7 +63,7 @@ test('purchase decrements the stock odometer and shows a success message', async
   const vehicle = await vehicles.create({ quantity: 2 });
   await openAuthenticated(page, user);
   const sticker = page.locator('.vehicle-sticker').filter({ hasText: vehicle.model });
-  await sticker.getByRole('button', { name: 'Purchase' }).click();
+  await sticker.getByRole('button', { name: `Purchase ${vehicle.make} ${vehicle.model}` }).click();
 
   await expect(sticker.getByLabel('1 in stock')).toBeVisible();
   await expect(page.getByRole('status')).toContainText('Purchased 1 ×');
@@ -78,7 +78,9 @@ test('zero-stock stickers disable purchase and say out of stock', async ({
   await openAuthenticated(page, user);
   const sticker = page.locator('.vehicle-sticker').filter({ hasText: vehicle.model });
 
-  await expect(sticker.getByRole('button', { name: 'Purchase' })).toBeDisabled();
+  await expect(
+    sticker.getByRole('button', { name: `Purchase ${vehicle.make} ${vehicle.model}` }),
+  ).toBeDisabled();
   await expect(sticker.getByText('Out of stock')).toBeVisible();
 });
 
@@ -90,10 +92,12 @@ test('purchasing the last unit changes the sticker to sold out', async ({
   const vehicle = await vehicles.create({ quantity: 1 });
   await openAuthenticated(page, user);
   const sticker = page.locator('.vehicle-sticker').filter({ hasText: vehicle.model });
-  await sticker.getByRole('button', { name: 'Purchase' }).click();
+  await sticker.getByRole('button', { name: `Purchase ${vehicle.make} ${vehicle.model}` }).click();
 
   await expect(sticker.getByLabel('0 in stock')).toBeVisible();
-  await expect(sticker.getByRole('button', { name: 'Purchase' })).toBeDisabled();
+  await expect(
+    sticker.getByRole('button', { name: `Purchase ${vehicle.make} ${vehicle.model}` }),
+  ).toBeDisabled();
   await expect(sticker.getByText('Sold out')).toBeVisible();
 });
 
@@ -182,14 +186,14 @@ test('the last inventory card action stays reachable while a toast is shown', as
   }
   await openAuthenticated(page, admin);
   const firstCard = page.locator('.vehicle-sticker').filter({ hasText: make }).first();
-  await firstCard.getByRole('button', { name: 'Purchase' }).click();
+  await firstCard.getByRole('button', { name: `Purchase ${make} UIFIX-00` }).click();
   await expect(page.getByRole('status')).toContainText('Purchased 1 ×');
   await openFiltersIfCollapsed(page);
   await page.getByLabel('Make').fill(make);
   await page.getByRole('button', { name: 'Search' }).click();
   await expect(page.locator('.vehicle-sticker')).toHaveCount(6);
   const lastCard = page.locator('.vehicle-sticker').last();
-  const purchaseButton = lastCard.getByRole('button', { name: 'Purchase' });
+  const purchaseButton = lastCard.getByRole('button', { name: /Purchase .* UIFIX-05/ });
   await purchaseButton.evaluate((button) => button.scrollIntoView({ block: 'end' }));
   const cardIsCovered = await lastCard.evaluate((card) => {
     const toast = document.querySelector('.status-message')!;
@@ -220,7 +224,7 @@ test('the last stock row action stays reachable while a toast is shown', async (
     .locator('.vehicle-sticker')
     .filter({ hasText: make })
     .first()
-    .getByRole('button', { name: 'Purchase' })
+    .getByRole('button', { name: /Purchase .* UIFIX-00/ })
     .click();
   await expect(page.getByRole('status')).toContainText('Purchased 1 ×');
 

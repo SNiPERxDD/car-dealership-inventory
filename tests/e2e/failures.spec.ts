@@ -42,7 +42,7 @@ test('maps an out-of-stock conflict to clear purchase copy', async ({ page, user
   });
   await openAuthenticated(page, user);
   const sticker = page.locator('.vehicle-sticker').filter({ hasText: vehicle.model });
-  await sticker.getByRole('button', { name: 'Purchase' }).click();
+  await sticker.getByRole('button', { name: `Purchase ${vehicle.make} ${vehicle.model}` }).click();
 
   await expect(page.getByRole('status')).toContainText(
     'None left in stock. The listing has been refreshed.',

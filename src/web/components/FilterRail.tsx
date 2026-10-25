@@ -1,26 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { CSSProperties, FormEvent } from 'react';
 import type { VehicleFilters } from '../hooks/useVehicles';
 import { formatPrice } from './VehicleSticker';
 
 interface FilterRailProps {
+  filters: VehicleFilters;
   priceCeiling: number;
-  resetKey: number;
+  onFiltersChange: (filters: VehicleFilters) => void;
   onSearch: (filters: VehicleFilters) => void;
   onClear: () => void;
 }
 
 /** Provides responsive search controls for vehicle make, model, category, and price. */
-export function FilterRail({ priceCeiling, resetKey, onSearch, onClear }: FilterRailProps) {
-  const [filters, setFilters] = useState<VehicleFilters>({});
+export function FilterRail({
+  filters,
+  onFiltersChange,
+  priceCeiling,
+  onSearch,
+  onClear,
+}: FilterRailProps) {
   const [open, setOpen] = useState(() => window.innerWidth >= 768);
-  const [previousResetKey, setPreviousResetKey] = useState(resetKey);
   const wasDesktop = useRef(window.innerWidth >= 768);
-
-  if (previousResetKey !== resetKey) {
-    setPreviousResetKey(resetKey);
-    setFilters({});
-  }
 
   useEffect(() => {
     const updateDisclosure = () => {
@@ -36,18 +36,16 @@ export function FilterRail({ priceCeiling, resetKey, onSearch, onClear }: Filter
 
   /** Stores the current value for one vehicle filter. */
   const update = (name: keyof VehicleFilters, value: string) => {
-    setFilters((current) => ({ ...current, [name]: value }));
+    onFiltersChange({ ...filters, [name]: value });
   };
 
   const updatePrice = (name: 'minPrice' | 'maxPrice', value: string) => {
-    setFilters((current) => {
-      const next = { ...current, [name]: value };
-      const minimum = Number(next.minPrice || 0);
-      const maximum = Number(next.maxPrice || priceCeiling);
-      if (name === 'minPrice' && value && minimum > maximum) next.maxPrice = value;
-      if (name === 'maxPrice' && value && maximum < minimum) next.minPrice = value;
-      return next;
-    });
+    const next = { ...filters, [name]: value };
+    const minimum = Number(next.minPrice || 0);
+    const maximum = Number(next.maxPrice || priceCeiling);
+    if (name === 'minPrice' && value && minimum > maximum) next.maxPrice = value;
+    if (name === 'maxPrice' && value && maximum < minimum) next.minPrice = value;
+    onFiltersChange(next);
   };
 
   /** Submits only the values the user has entered. */
@@ -58,12 +56,13 @@ export function FilterRail({ priceCeiling, resetKey, onSearch, onClear }: Filter
 
   /** Resets the visible fields and reloads the unfiltered inventory. */
   const clear = () => {
-    setFilters({});
     onClear();
   };
 
   const minimum = Math.min(Number(filters.minPrice || 0), Number(filters.maxPrice || priceCeiling));
   const maximum = Math.min(Number(filters.maxPrice || priceCeiling), priceCeiling);
+  // Thumb positions as 0-1 fractions so CSS can paint the selected band between them.
+  const rangeSpan = Math.max(priceCeiling, 1);
 
   const form = (
     <form className="filter-form" onSubmit={submit}>
@@ -112,7 +111,11 @@ export function FilterRail({ priceCeiling, resetKey, onSearch, onClear }: Filter
         <p>
           {formatPrice(minimum)} – {formatPrice(maximum)}
         </p>
-        <div className="price-range-track" aria-label="Price range">
+        <div
+          className="price-range-track"
+          aria-label="Price range"
+          style={{ '--min': minimum / rangeSpan, '--max': maximum / rangeSpan } as CSSProperties}
+        >
           <input
             aria-label="Minimum price"
             type="range"
