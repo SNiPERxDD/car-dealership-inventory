@@ -98,6 +98,17 @@ describe('GET /api/vehicles/search', () => {
     expect(response.body).toEqual([]);
   });
 
+  it('rejects a NUL byte in a search filter with 400 VALIDATION_ERROR', async () => {
+    const response = await request(app)
+      .get('/api/vehicles/search?make=%00')
+      .set('Authorization', `Bearer ${userToken}`);
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: { code: 'VALIDATION_ERROR', message: expect.any(String) },
+    });
+  });
+
   it.each([
     ['an unknown query parameter', '?colour=red'],
     ['a non-numeric minimum price', '?minPrice=cheap'],

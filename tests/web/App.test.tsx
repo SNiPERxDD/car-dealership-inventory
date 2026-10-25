@@ -372,13 +372,16 @@ describe('Northgate inventory application', () => {
     );
 
     await user.click(await screen.findByRole('button', { name: 'Edit' }));
+    expect(screen.getByText('Current stock: 3')).toBeInTheDocument();
+    expect(screen.getByText('Use Restock to add units')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Quantity')).not.toBeInTheDocument();
     await user.clear(screen.getByLabelText('Price'));
     await user.type(screen.getByLabelText('Price'), '29000');
     await user.click(screen.getByRole('button', { name: 'Save vehicle' }));
     await waitFor(() => expect(apiCall(4).init.method).toBe('PUT'));
     expect(apiCall(4).url.pathname).toBe(`/api/vehicles/${vehicle.id}`);
     expect(apiCall(4).init.body).toBe(
-      JSON.stringify({ make: 'Bolt', model: 'Trail', category: 'SUV', price: 29000, quantity: 3 }),
+      JSON.stringify({ make: 'Bolt', model: 'Trail', category: 'SUV', price: 29000 }),
     );
 
     await user.click(await screen.findByRole('button', { name: 'Restock' }));

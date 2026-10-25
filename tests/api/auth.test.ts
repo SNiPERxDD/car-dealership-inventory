@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { decodeJwt, decodeProtectedHeader } from 'jose';
 import { createPool } from '../../src/server/db/pool.js';
@@ -9,6 +9,10 @@ const app = buildTestApp(pool);
 
 beforeEach(async () => {
   await resetUsers(pool);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 afterAll(async () => {
@@ -154,6 +158,10 @@ describe('POST /api/auth/register and /api/auth/login', () => {
   it.each([
     { case: 'an invalid email', body: { email: 'not-an-email', password: 'valid-password' } },
     {
+      case: 'an email with a NUL byte',
+      body: { email: 'person\u0000@example.com', password: 'valid-password' },
+    },
+    {
       case: 'an email over 254 characters',
       body: { email: 'a'.repeat(250) + '@example.com', password: 'valid-password' },
     },
@@ -202,5 +210,32 @@ describe('POST /api/auth/register and /api/auth/login', () => {
     expect(response.body).toEqual({
       error: { code: 'INVALID_JSON', message: expect.any(String) },
     });
+  });
+
+  it('returns 413 PAYLOAD_TOO_LARGE for a 200 kB login body without logging it', async () => {
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'person@example.com', password: 'x'.repeat(200_000) });
+
+    expect(response.status).toBe(413);
+    expect(response.body).toEqual({
+      error: { code: 'PAYLOAD_TOO_LARGE', message: expect.any(String) },
+    });
+    expect(errorLog).not.toHaveBeenCalled();
+  });
+
+  it('returns 415 UNSUPPORTED_MEDIA_TYPE for an unsupported JSON charset without logging it', async () => {
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const response = await request(app)
+      .post('/api/auth/login')
+      .set('Content-Type', 'application/json; charset=latin9')
+      .send(JSON.stringify({ email: 'person@example.com', password: 'valid-password' }));
+
+    expect(response.status).toBe(415);
+    expect(response.body).toEqual({
+      error: { code: 'UNSUPPORTED_MEDIA_TYPE', message: expect.any(String) },
+    });
+    expect(errorLog).not.toHaveBeenCalled();
   });
 });

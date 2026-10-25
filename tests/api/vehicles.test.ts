@@ -144,6 +144,7 @@ describe('vehicle CRUD API', () => {
     ['model over 100 characters', { ...vehicleBody, model: 'm'.repeat(101) }],
     ['category empty', { ...vehicleBody, category: '' }],
     ['category over 100 characters', { ...vehicleBody, category: 'c'.repeat(101) }],
+    ['make with a NUL byte', { ...vehicleBody, make: 'Hon\u0000da' }],
     ['price as a string', { ...vehicleBody, price: '19999.99' }],
     ['negative price', { ...vehicleBody, price: -1 }],
     ['price with more than two decimals', { ...vehicleBody, price: 12.345 }],
@@ -210,6 +211,27 @@ describe('vehicle CRUD API', () => {
     expect(updated.status).toBe(200);
     expect(updated.body).toEqual({ id: created.body.id, ...replacement });
     expect(listed.body).toContainEqual({ id: created.body.id, ...replacement });
+  });
+
+  it('keeps the current stock when a replacement omits quantity after a purchase', async () => {
+    const created = await request(app)
+      .post('/api/vehicles')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(vehicleBody);
+    expect(created.status).toBe(201);
+
+    const purchased = await request(app)
+      .post(`/api/vehicles/${created.body.id as string}/purchase`)
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(purchased.status).toBe(200);
+
+    const updated = await request(app)
+      .put(`/api/vehicles/${created.body.id as string}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ make: 'Acura', model: 'Civic', category: 'sedan', price: 24950 });
+
+    expect(updated.status).toBe(200);
+    expect(updated.body).toMatchObject({ id: created.body.id, make: 'Acura', quantity: 3 });
   });
 
   it('rejects vehicle updates by a normal user with 403 FORBIDDEN', async () => {
