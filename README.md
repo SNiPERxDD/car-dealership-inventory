@@ -92,4 +92,17 @@ RED commits (`test: ... (red)`) record failing behavioral tests as intermediate 
 
 ## My AI Usage
 
-Claude Code with Claude Opus 5.5 led planning, per-slice briefs, review judgment, and commits. Codex GPT-6 Luna lanes handled implementation and verification. opencode and kilo lanes provided independent reviews. Work followed requirement-citing briefs, RED then GREEN commits, and an independent review after each slice. Small slices and separate reviews kept changes easy to inspect. Corrections included quoting variables for zsh, running ESM probes from their package context, passing database configuration to Vitest global setup explicitly, preserving Supabase certificate verification, and serializing tests that share a database. Raw logs are in [PROMPTS.md](PROMPTS.md).
+### Tools and how I used them
+
+- ChatGPT helped plan the phases, architecture, requirement mapping, and test strategy.
+- Claude Code with Claude Opus 5.5 led planning, per-slice briefs, review judgment, and commits.
+- Codex with GPT-6 Luna handled implementation and verification in delegated lanes.
+- OpenCode and Kilo provided independent reviews.
+
+### Where AI helped
+
+AI assisted with implementation, tests, debugging, reviews, and documentation. Work used requirement-citing briefs, RED then GREEN commits, and independent reviews after slices. Corrections included quoting variables for zsh, running ESM probes from their package context, passing database configuration to Vitest global setup explicitly, preserving Supabase certificate verification, and serializing tests that share a database. Raw logs are in [PROMPTS.md](PROMPTS.md).
+
+### Reflection
+
+[Owner: add your own reflection on how AI affected your workflow and what you learned.]
