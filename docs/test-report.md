@@ -1,30 +1,33 @@
 # Test report
 
-Date: 2026-10-24
-Commit: 38d740a
+Date: 2026-10-25
+Commit: 4e288dc
 
-## Vitest
+## Screenshots
 
-Command: `npm test`
+- Authentication and administration: 1280 × 900; inventory: 1280 px wide, full page; mobile inventory: 390 × 844 CSS px, full page.
+- All four images were opened and checked. Inventory shows 10 demo vehicles; the administration dialog is fully visible.
 
-- Test files: 13 passed.
-- Tests: 148 passed.
+## Local checks
 
-## Playwright
-
-- Local CI mirror: 62 passed across `chromium-desktop` and `webkit-mobile`.
-- Protected Vercel preview with Supabase preview database: 60 passed, 2 skipped. The expired-token case requires the deployment's JWT secret, which is not available to the runner by design.
+- Vitest: 14 files, 165 tests, 0 failures, 0 errors, 0 skipped.
+- Typecheck: passed.
+- Lint: passed.
+- Build: passed.
+- Prettier: passed.
+- Playwright: 70 passed, 0 failed, 0 skipped across `chromium-desktop` and `webkit-mobile`.
 
 ## GitHub Actions
 
-Latest run on `main`: CI run 40045278009.
+Latest run on `main`: CI run 40209842459, success.
 
-- `verify`: passed.
-- `e2e`: passed.
+## Earlier deployed verification (2026-10-24, before the redesign)
 
-## Production
+- Protected Vercel preview with Supabase preview database: 60 passed, 2 skipped. The expired-token case requires the deployment's JWT secret, which is not available to the runner by design.
 
-Controlled verification completed on 2026-10-24 against [the production deployment](https://car-dealership-inventory-phi.vercel.app), deployed from commit 514587b.
+### Production
+
+Controlled verification completed on 2026-10-24 against [the production deployment](https://car-dealership-inventory-phi.vercel.app), deployed from commit eca61dd.
 
 - Result: 10 passed, 0 failed, 0 skipped; chromium-desktop.
 - Fixture vehicles: all removed successfully by teardown.

@@ -4,10 +4,10 @@ Northgate Motors is a car dealership inventory system with account registration 
 
 ## Screenshots
 
-- Authentication: ![Authentication screen](docs/screenshots/auth.png)
-- Inventory: ![Inventory screen](docs/screenshots/inventory.png)
-- Administration: ![Admin screen](docs/screenshots/admin.png)
-- Mobile: ![Mobile layout](docs/screenshots/mobile.png)
+- Authentication, desktop: ![Authentication screen](docs/screenshots/auth.png)
+- Inventory, desktop: ![Inventory screen](docs/screenshots/inventory.png)
+- Administration with the restock dialog: ![Admin screen](docs/screenshots/admin.png)
+- Inventory, mobile: ![Mobile layout](docs/screenshots/mobile.png)
 
 ## Stack
 
