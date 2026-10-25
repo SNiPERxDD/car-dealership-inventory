@@ -1,52 +1,38 @@
-import { useState } from 'react';
 import type { Vehicle, VehicleFilters } from '../hooks/useVehicles';
 import { FilterRail } from '../components/FilterRail';
 import { VehicleSticker } from '../components/VehicleSticker';
 
 interface InventoryProps {
   vehicles: Vehicle[];
+  filters: VehicleFilters;
+  searchActive: boolean;
   priceCeiling: number;
   loading: boolean;
   loadError: string;
   onSearch: (filters: VehicleFilters) => void;
+  onFiltersChange: (filters: VehicleFilters) => void;
   onClear: () => void;
-  onPurchase: (vehicle: Vehicle) => void;
+  onPurchase: (vehicle: Vehicle) => Promise<string | null>;
 }
 
 /** Shows the filter rail and responsive grid of vehicle window stickers. */
 export function Inventory({
   vehicles,
+  filters,
+  searchActive,
   priceCeiling,
   loading,
   loadError,
   onSearch,
+  onFiltersChange,
   onClear,
   onPurchase,
 }: InventoryProps) {
-  const [searchActive, setSearchActive] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
-
-  const search = (filters: VehicleFilters) => {
-    setSearchActive(true);
-    onSearch(filters);
-  };
-
-  const clear = () => {
-    setSearchActive(false);
-    setResetKey((current) => current + 1);
-    onClear();
-  };
-
-  const retry = () => {
-    setSearchActive(false);
-    setResetKey((current) => current + 1);
-    onClear();
-  };
-
   return (
     <section className="inventory-screen" aria-labelledby="inventory-title">
       <div className="screen-heading">
         <div>
+          <p className="section-kicker">On the lot today</p>
           <h1 id="inventory-title">Inventory</h1>
         </div>
         {!loading && !loadError && (
@@ -57,16 +43,17 @@ export function Inventory({
       </div>
       <div className="inventory-layout">
         <FilterRail
+          filters={filters}
           priceCeiling={priceCeiling}
-          resetKey={resetKey}
-          onSearch={search}
-          onClear={clear}
+          onFiltersChange={onFiltersChange}
+          onSearch={onSearch}
+          onClear={onClear}
         />
         {loadError ? (
           <div className="empty-state inventory-error" role="alert">
             <h2>Inventory could not load.</h2>
             <p>{loadError}</p>
-            <button className="secondary-button" type="button" onClick={retry}>
+            <button className="secondary-button" type="button" onClick={onClear}>
               Try again
             </button>
           </div>
@@ -78,14 +65,19 @@ export function Inventory({
           </div>
         ) : vehicles.length ? (
           <div className="sticker-grid">
-            {vehicles.map((vehicle) => (
-              <VehicleSticker key={vehicle.id} vehicle={vehicle} onPurchase={onPurchase} />
+            {vehicles.map((vehicle, index) => (
+              <VehicleSticker
+                key={vehicle.id}
+                vehicle={vehicle}
+                index={index}
+                onPurchase={onPurchase}
+              />
             ))}
           </div>
         ) : searchActive ? (
           <div className="empty-state">
             <h2>No vehicles match these filters.</h2>
-            <button className="secondary-button" type="button" onClick={clear}>
+            <button className="secondary-button" type="button" onClick={onClear}>
               Clear filters
             </button>
           </div>

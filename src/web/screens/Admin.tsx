@@ -6,6 +6,14 @@ import { StockOdometer } from '../components/StockOdometer';
 import { VehicleFormDialog } from '../components/VehicleFormDialog';
 import { formatPrice } from '../components/VehicleSticker';
 
+/** Formats the total stock value as a short currency figure such as $1.2M. */
+const compactCurrency = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
 interface AdminProps {
   vehicles: Vehicle[];
   loading: boolean;
@@ -51,10 +59,18 @@ export function Admin({
     if (!error) setConfirmingId('');
   };
 
+  const unitsOnHand = vehicles.reduce((total, vehicle) => total + vehicle.quantity, 0);
+  const awaitingRestock = vehicles.filter((vehicle) => vehicle.quantity === 0).length;
+  const stockValue = vehicles.reduce(
+    (total, vehicle) => total + vehicle.price * vehicle.quantity,
+    0,
+  );
+
   return (
     <section className="admin-screen" aria-labelledby="admin-title">
       <div className="screen-heading admin-heading">
         <div>
+          <p className="section-kicker">Back office</p>
           <h1 id="admin-title">Manage stock</h1>
         </div>
         <button className="primary-button" type="button" onClick={() => setVehicleForm('new')}>
@@ -78,76 +94,104 @@ export function Admin({
           <h2>The lot is empty. Add the first vehicle.</h2>
         </div>
       ) : (
-        <div className="inventory-table-wrap">
-          <table className="inventory-table">
-            <thead>
-              <tr>
-                <th>Make</th>
-                <th>Model</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vehicles.map((vehicle) => (
-                <tr key={vehicle.id}>
-                  <td data-label="Make">{vehicle.make}</td>
-                  <td data-label="Model" className="admin-model">
-                    {vehicle.model}
-                  </td>
-                  <td data-label="Category">{vehicle.category}</td>
-                  <td data-label="Price" className="data-text">
-                    {formatPrice(vehicle.price)}
-                  </td>
-                  <td data-label="Stock">
-                    <StockOdometer quantity={vehicle.quantity} compact />
-                  </td>
-                  <td data-label="Actions">
-                    <div
-                      className={`row-actions${confirmingId === vehicle.id ? ' is-hidden' : ''}`}
-                    >
-                      <button
-                        className="secondary-button"
-                        type="button"
-                        onClick={() => setVehicleForm(vehicle)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="secondary-button"
-                        type="button"
-                        onClick={() => setRestockVehicle(vehicle)}
-                      >
-                        Restock
-                      </button>
-                      <button
-                        className="danger-button"
-                        type="button"
-                        ref={(element) => {
-                          if (element) deleteButtonsRef.current.set(vehicle.id, element);
-                          else deleteButtonsRef.current.delete(vehicle.id);
-                        }}
-                        onClick={() => setConfirmingId(vehicle.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                    {confirmingId === vehicle.id && (
-                      <ConfirmDelete
-                        make={vehicle.make}
-                        model={vehicle.model}
-                        onDelete={() => void removeVehicle(vehicle)}
-                        onCancel={() => setConfirmingId('')}
-                      />
-                    )}
-                  </td>
+        <>
+          <dl className="stock-ledger">
+            <div>
+              <dt>Models</dt>
+              <dd>{vehicles.length}</dd>
+            </div>
+            <div>
+              <dt>Units on hand</dt>
+              <dd>{unitsOnHand}</dd>
+            </div>
+            <div className={awaitingRestock ? 'needs-attention' : undefined}>
+              <dt>Awaiting restock</dt>
+              <dd>{awaitingRestock}</dd>
+            </div>
+            <div>
+              <dt>Stock value</dt>
+              <dd>{compactCurrency.format(stockValue)}</dd>
+            </div>
+          </dl>
+          <div className="inventory-table-wrap">
+            <table className="inventory-table" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th role="columnheader">Make</th>
+                  <th role="columnheader">Model</th>
+                  <th role="columnheader">Category</th>
+                  <th role="columnheader">Price</th>
+                  <th role="columnheader">Stock</th>
+                  <th role="columnheader">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody role="rowgroup">
+                {vehicles.map((vehicle) => (
+                  <tr
+                    role="row"
+                    key={vehicle.id}
+                    className={vehicle.quantity === 0 ? 'is-sold-out' : undefined}
+                  >
+                    <td role="cell" data-label="Make">
+                      {vehicle.make}
+                    </td>
+                    <td role="cell" data-label="Model" className="admin-model">
+                      {vehicle.model}
+                    </td>
+                    <td role="cell" data-label="Category">
+                      <span className="category-chip">{vehicle.category}</span>
+                    </td>
+                    <td role="cell" data-label="Price" className="data-text">
+                      {formatPrice(vehicle.price)}
+                    </td>
+                    <td role="cell" data-label="Stock">
+                      <StockOdometer quantity={vehicle.quantity} compact />
+                    </td>
+                    <td role="cell" data-label="Actions">
+                      <div
+                        className={`row-actions${confirmingId === vehicle.id ? ' is-hidden' : ''}`}
+                      >
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={() => setVehicleForm(vehicle)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="secondary-button"
+                          type="button"
+                          onClick={() => setRestockVehicle(vehicle)}
+                        >
+                          Restock
+                        </button>
+                        <button
+                          className="danger-button"
+                          type="button"
+                          ref={(element) => {
+                            if (element) deleteButtonsRef.current.set(vehicle.id, element);
+                            else deleteButtonsRef.current.delete(vehicle.id);
+                          }}
+                          onClick={() => setConfirmingId(vehicle.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                      {confirmingId === vehicle.id && (
+                        <ConfirmDelete
+                          make={vehicle.make}
+                          model={vehicle.model}
+                          onDelete={() => void removeVehicle(vehicle)}
+                          onCancel={() => setConfirmingId('')}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
       {vehicleForm && (
         <VehicleFormDialog
