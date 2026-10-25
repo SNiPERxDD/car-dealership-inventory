@@ -11,3 +11,4 @@
 2026-10-24 04:51 | P5 frontend: window-sticker inventory, auth, admin stock management, typed API client and component tests | src/web/, tests/web/App.test.tsx, vitest.config.ts, index.html, public/favicon.svg, package.json
 2026-10-24 06:44 | P6 Playwright suite, stale request fix, preview and production verification, screenshots, and demo access docs | tests/e2e/, playwright.config.ts, src/web/hooks/useVehicles.ts, eslint.config.js, docs/screenshots/, README.md, docs/test-report.md, HANDOVER.md
 2026-10-24 10:17 | UI fixes: load errors, price sliders, delete focus, mobile targets, and toast flow | src/web/, tests/web/App.test.tsx, tests/e2e/
+2026-10-25 21:05 | Prevented stock lost updates, normalized body-parser errors, rejected NUL input, and clarified Node/browser setup | src/server/, src/web/components/VehicleFormDialog.tsx, src/web/hooks/useVehicles.ts, src/web/screens/Admin.tsx, tests/, package.json, package-lock.json, README.md, HANDOVER.md

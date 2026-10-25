@@ -19,6 +19,8 @@ export interface VehicleFields {
   quantity: number;
 }
 
+export type VehicleUpdateFields = Omit<VehicleFields, 'quantity'>;
+
 export interface VehicleFilters {
   make?: string;
   model?: string;
@@ -164,7 +166,7 @@ export function useVehicles(token: string, onUnauthorized: () => void) {
   );
 
   const update = useCallback(
-    (id: string, fields: VehicleFields) =>
+    (id: string, fields: VehicleUpdateFields) =>
       mutate<Vehicle>(`/api/vehicles/${id}`, 'PUT', fields, () => 'Vehicle details updated.'),
     [mutate],
   );

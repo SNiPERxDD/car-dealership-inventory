@@ -1,8 +1,14 @@
 import { z } from 'zod';
 
-const vehicleTextSchema = z.string().trim().min(1).max(100);
+const vehicleTextSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(100)
+  .refine((value) => !value.includes('\0'));
+const vehicleQuantitySchema = z.number().int().min(0).max(2147483647);
 
-/** Validates the strict request body shared by vehicle creation and replacement. */
+/** Validates the strict request body required for vehicle creation. */
 export const vehicleBodySchema = z
   .object({
     make: vehicleTextSchema,
@@ -14,9 +20,14 @@ export const vehicleBodySchema = z
       .min(0)
       .max(9999999999.99)
       .refine(hasAtMostTwoDecimalPlaces, 'Price must have at most two decimal places'),
-    quantity: z.number().int().min(0).max(2147483647),
+    quantity: vehicleQuantitySchema,
   })
   .strict();
+
+/** Validates vehicle replacement fields while allowing stock to remain unchanged. */
+export const vehicleUpdateBodySchema = vehicleBodySchema.extend({
+  quantity: vehicleQuantitySchema.optional(),
+});
 
 /** Accepts no purchase fields, including an omitted request body. */
 export const purchaseBodySchema = z
@@ -36,6 +47,7 @@ export const vehicleIdSchema = z.uuid();
 const optionalSearchTextSchema = z
   .string()
   .trim()
+  .refine((value) => !value.includes('\0'))
   .transform((value) => (value === '' ? undefined : value))
   .optional();
 
@@ -78,6 +90,7 @@ export const vehicleSearchQuerySchema = z
   });
 
 export type VehicleBody = z.infer<typeof vehicleBodySchema>;
+export type VehicleUpdateBody = z.infer<typeof vehicleUpdateBodySchema>;
 export type VehicleSearchQuery = z.infer<typeof vehicleSearchQuerySchema>;
 export type RestockBody = z.infer<typeof restockBodySchema>;
 

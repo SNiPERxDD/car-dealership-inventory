@@ -4,13 +4,14 @@ import type { ParamsDictionary } from 'express-serve-static-core';
 import { HttpError } from '../middleware/errors.js';
 import { requireAdmin, requireAuth } from '../middleware/auth.js';
 import { validateBody } from '../middleware/validation.js';
-import type { RestockBody, VehicleBody } from './schemas.js';
+import type { RestockBody, VehicleBody, VehicleUpdateBody } from './schemas.js';
 import {
   purchaseBodySchema,
   restockBodySchema,
   vehicleBodySchema,
   vehicleIdSchema,
   vehicleSearchQuerySchema,
+  vehicleUpdateBodySchema,
 } from './schemas.js';
 import type { Vehicle } from './vehicle-repository.js';
 import { VehicleService } from './vehicle-service.js';
@@ -53,7 +54,7 @@ export function createVehicleRouter(vehicleService: VehicleService, jwtSecret: s
     authenticate,
     requireAdmin,
     validateVehicleId,
-    validateBody(vehicleBodySchema),
+    validateBody(vehicleUpdateBodySchema),
     updateVehicle(vehicleService),
   );
   router.delete(
@@ -120,7 +121,7 @@ function searchVehicles(
 /** Builds the authenticated full-replacement handler. */
 function updateVehicle(
   vehicleService: VehicleService,
-): RequestHandler<VehicleIdParameters, Vehicle, VehicleBody> {
+): RequestHandler<VehicleIdParameters, Vehicle, VehicleUpdateBody> {
   return async (request, response) => {
     response.status(200).json(await vehicleService.update(request.params.id, request.body));
   };

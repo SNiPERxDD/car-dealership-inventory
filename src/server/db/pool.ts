@@ -16,5 +16,7 @@ export function createPool(
   if (!connectionString) {
     throw new Error('DATABASE_URL is not set.');
   }
-  return new pg.Pool({ connectionString, max, connectionTimeoutMillis: 5_000 });
+  const pool = new pg.Pool({ connectionString, max, connectionTimeoutMillis: 5_000 });
+  pool.on('error', (error) => console.error(error));
+  return pool;
 }

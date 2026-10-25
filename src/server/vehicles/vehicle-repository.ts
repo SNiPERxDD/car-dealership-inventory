@@ -1,5 +1,5 @@
 import type pg from 'pg';
-import type { VehicleBody, VehicleSearchQuery } from './schemas.js';
+import type { VehicleBody, VehicleSearchQuery, VehicleUpdateBody } from './schemas.js';
 
 export interface Vehicle {
   id: string;
@@ -78,14 +78,14 @@ export class VehicleInventoryRepository {
     return result.rows.map(mapVehicleRow);
   }
 
-  /** Replaces all mutable vehicle fields and returns null when the identifier is absent. */
-  async update(id: string, vehicle: VehicleBody): Promise<Vehicle | null> {
+  /** Updates vehicle details and optional stock, returning null when the identifier is absent. */
+  async update(id: string, vehicle: VehicleUpdateBody): Promise<Vehicle | null> {
     const result = await this.pool.query<VehicleRow>(
       `UPDATE vehicles
-       SET make = $2, model = $3, category = $4, price = $5, quantity = $6, updated_at = now()
+       SET make = $2, model = $3, category = $4, price = $5, quantity = COALESCE($6, quantity), updated_at = now()
        WHERE id = $1
        RETURNING ${VEHICLE_COLUMNS}`,
-      [id, vehicle.make, vehicle.model, vehicle.category, vehicle.price, vehicle.quantity],
+      [id, vehicle.make, vehicle.model, vehicle.category, vehicle.price, vehicle.quantity ?? null],
     );
     return result.rows[0] ? mapVehicleRow(result.rows[0]) : null;
   }

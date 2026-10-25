@@ -1,5 +1,5 @@
 import { HttpError } from '../middleware/errors.js';
-import type { RestockBody, VehicleBody, VehicleSearchQuery } from './schemas.js';
+import type { RestockBody, VehicleBody, VehicleSearchQuery, VehicleUpdateBody } from './schemas.js';
 import type { Vehicle, VehicleInventoryRepository } from './vehicle-repository.js';
 
 /** Applies vehicle inventory rules using the injected repository. */
@@ -26,8 +26,8 @@ export class VehicleService {
     });
   }
 
-  /** Replaces an existing vehicle or raises the public not-found error. */
-  async update(id: string, vehicle: VehicleBody): Promise<Vehicle> {
+  /** Updates vehicle details and raises the public not-found error when absent. */
+  async update(id: string, vehicle: VehicleUpdateBody): Promise<Vehicle> {
     const updatedVehicle = await this.vehicleRepository.update(id, vehicle);
     if (!updatedVehicle) {
       throw new HttpError(404, 'VEHICLE_NOT_FOUND', 'Vehicle was not found');

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Vehicle, VehicleFields } from '../hooks/useVehicles';
+import type { Vehicle, VehicleFields, VehicleUpdateFields } from '../hooks/useVehicles';
 
 interface VehicleFormDialogProps {
   vehicle?: Vehicle;
-  onSave: (fields: VehicleFields) => Promise<string | null>;
+  onSave: (fields: VehicleFields | VehicleUpdateFields) => Promise<string | null>;
   onClose: () => void;
 }
 
@@ -51,14 +51,18 @@ export function VehicleFormDialog({ vehicle, onSave, onClose }: VehicleFormDialo
       setError('Enter a price of 0 or more with no more than 2 decimal places.');
       return;
     }
-    if (!quantityText || !Number.isInteger(quantity) || quantity < 0 || quantity > 2147483647) {
+    if (
+      !vehicle &&
+      (!quantityText || !Number.isInteger(quantity) || quantity < 0 || quantity > 2147483647)
+    ) {
       setError('Quantity must be a whole number of 0 or more.');
       return;
     }
 
     setSaving(true);
     setError('');
-    const result = await onSave({ make, model, category, price, quantity });
+    const fields = { make, model, category, price };
+    const result = await onSave(vehicle ? fields : { ...fields, quantity });
     setSaving(false);
     if (result) setError(result);
     else onClose();
@@ -116,18 +120,17 @@ export function VehicleFormDialog({ vehicle, onSave, onClose }: VehicleFormDialo
               defaultValue={vehicle?.price ?? ''}
             />
           </label>
-          <label>
-            Quantity
-            <input
-              name="quantity"
-              type="number"
-              required
-              min="0"
-              max="2147483647"
-              step="1"
-              defaultValue={vehicle?.quantity ?? ''}
-            />
-          </label>
+          {vehicle ? (
+            <div>
+              <p>Current stock: {vehicle.quantity}</p>
+              <p>Use Restock to add units</p>
+            </div>
+          ) : (
+            <label>
+              Quantity
+              <input name="quantity" type="number" required min="0" max="2147483647" step="1" />
+            </label>
+          )}
         </div>
         {error && (
           <p className="inline-error" role="alert">

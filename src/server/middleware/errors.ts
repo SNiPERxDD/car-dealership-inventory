@@ -28,10 +28,21 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _request, resp
     response.status(error.status).json({ error: { code: error.code, message: error.message } });
     return;
   }
-  if (isBodyParseError(error)) {
-    response
-      .status(400)
-      .json({ error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } });
+  if (isBodyParserError(error)) {
+    const status = error.status;
+    const code =
+      error.type === 'entity.parse.failed'
+        ? 'INVALID_JSON'
+        : status === 413
+          ? 'PAYLOAD_TOO_LARGE'
+          : status === 415
+            ? 'UNSUPPORTED_MEDIA_TYPE'
+            : 'BAD_REQUEST';
+    const message =
+      error.type === 'entity.parse.failed'
+        ? 'Request body is not valid JSON'
+        : 'Invalid request body';
+    response.status(status).json({ error: { code, message } });
     return;
   }
   console.error(error);
@@ -40,11 +51,16 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _request, resp
     .json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } });
 };
 
-function isBodyParseError(error: unknown): boolean {
+/** Recognizes body-parser errors carrying a client-error status. */
+function isBodyParserError(error: unknown): error is { status: number; type: string } {
   return (
     typeof error === 'object' &&
     error !== null &&
+    'status' in error &&
+    typeof error.status === 'number' &&
+    error.status >= 400 &&
+    error.status < 500 &&
     'type' in error &&
-    error.type === 'entity.parse.failed'
+    typeof error.type === 'string'
   );
 }

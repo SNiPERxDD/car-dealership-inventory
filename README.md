@@ -21,7 +21,7 @@ Northgate Motors is a car dealership inventory system with account registration 
 
 ## Local setup
 
-Requirements: Node.js 22 or newer and Docker with Docker Compose. From a fresh clone:
+Requirements: Node.js 22.9 or newer and Docker with Docker Compose. From a fresh clone:
 
 ```sh
 git clone <repository-url>
@@ -43,6 +43,7 @@ The API runs at `http://localhost:3001`; Vite serves the web app at `http://loca
 
 ```sh
 npm test
+npx playwright install chromium webkit
 npx playwright test
 npm run typecheck
 npm run lint

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Vehicle, VehicleFields } from '../hooks/useVehicles';
+import type { Vehicle, VehicleFields, VehicleUpdateFields } from '../hooks/useVehicles';
 import { ConfirmDelete } from '../components/ConfirmDelete';
 import { RestockDialog } from '../components/RestockDialog';
 import { StockOdometer } from '../components/StockOdometer';
@@ -12,7 +12,7 @@ interface AdminProps {
   loadError: string;
   onRetry: () => void;
   onCreate: (fields: VehicleFields) => Promise<string | null>;
-  onUpdate: (id: string, fields: VehicleFields) => Promise<string | null>;
+  onUpdate: (id: string, fields: VehicleUpdateFields) => Promise<string | null>;
   onRestock: (vehicle: Vehicle, quantity: number) => Promise<string | null>;
   onDelete: (vehicle: Vehicle) => Promise<string | null>;
 }
@@ -42,8 +42,17 @@ export function Admin({
   }, [confirmingId]);
 
   /** Routes the shared dialog payload to the create or replacement endpoint. */
-  const saveVehicle = (fields: VehicleFields) =>
-    vehicleForm === 'new' ? onCreate(fields) : onUpdate(vehicleForm!.id, fields);
+  const saveVehicle = (fields: VehicleFields | VehicleUpdateFields) => {
+    if (vehicleForm === 'new') {
+      return 'quantity' in fields ? onCreate(fields) : Promise.resolve('Quantity is required.');
+    }
+    return onUpdate(vehicleForm!.id, {
+      make: fields.make,
+      model: fields.model,
+      category: fields.category,
+      price: fields.price,
+    });
+  };
 
   /** Removes a vehicle after confirmation and closes the prompt on success. */
   const removeVehicle = async (vehicle: Vehicle) => {

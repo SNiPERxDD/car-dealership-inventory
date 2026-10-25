@@ -42,6 +42,10 @@
 - Next (owner): complete `PROMPTS.md` with the redacted raw transcripts (PRD "PROMPTS.md" rule).
 - Fixture users are never deleted by the Playwright teardown (no delete-user route); each
   deployed run leaves `@example.test` accounts behind.
+- Backend/setup review fixes completed 2026-10-25: PUT leaves omitted stock unchanged, edit UI
+  shows stock read-only, body-parser 4xx errors keep their status, vehicle/search NULs are rejected,
+  and pool errors are logged. Node 22.9 and Playwright browser setup are documented. Local checks:
+  161 tests, typecheck, lint, build, and Prettier pass; Playwright E2E and deployment were not run.
 
 ## Proposals for the Owner (outside `PRD.md`, not implemented)
 - Security headers: add a `headers` block to `vercel.json` for all routes with
