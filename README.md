@@ -24,7 +24,7 @@ Northgate Motors is a car dealership inventory system with account registration 
 Requirements: Node.js 22.9 or newer and Docker with Docker Compose. From a fresh clone:
 
 ```sh
-git clone <repository-url>
+git clone https://github.com/SNiPERxDD/car-dealership-inventory.git
 cd car-dealership-inventory
 npm ci
 cp .env.example .env
