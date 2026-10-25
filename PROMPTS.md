@@ -1,6 +1,6 @@
 # Prompts
 
-This file holds the owner's raw planning and Claude Code prompts. Tools used: ChatGPT for planning and Claude Code for the build and redesign; delegated lanes are not listed. Redactions remove local paths, email addresses, the owner's name or handle, session URLs and IDs, and secrets except published demo or CI values.
+This file holds the owner's planning and Claude Code prompts. ChatGPT was used for planning; Claude Code (Claude Opus 5.5) led the build and the UI redesign. Many instructions never needed a prompt: standing rules lived in instruction and memory files (`AGENTS.md`, `HANDOVER.md`, `PRD.md` and the agent's persistent memory), and Claude Code delegated implementation and reviews to worker lanes through written briefs: Codex (GPT-6 Luna), OpenCode, Kilo and Antigravity (Gemini). Those briefs and lane transcripts are not listed.
 
 ## ChatGPT (planning)
 ### Prompt 1
@@ -44,7 +44,7 @@ Model: GPT 6 HIGH
 Model: GPT 6 HIGH
 
 <details>
-<summary>Show full prompt (33 lines)</summary>
+<summary>Show full prompt (20 lines)</summary>
 
 > Now, looking at everything together:
 >
@@ -66,19 +66,6 @@ Model: GPT 6 HIGH
 > - Is there anything important I forgot to ask?
 >
 > Think thoroughly and give me a concrete, structured un-bloated answer.
->
->
->
-> ---
->
-> 1. [https://github.com/incubyte/ai-plugins](https://github.com/incubyte/ai-plugins?utm_source=chatgpt.com)
-> 2. [https://github.com/obra/superpowers](https://github.com/obra/superpowers?utm_source=chatgpt.com)
-> 3. [https://github.com/supabase/agent-skills](https://github.com/supabase/agent-skills?utm_source=chatgpt.com)
-> 4. [https://github.com/vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills?utm_source=chatgpt.com)
-> 5. [https://github.com/pbakaus/impeccable](https://github.com/pbakaus/impeccable?utm_source=chatgpt.com)
-> 6. [https://github.com/microsoft/playwright-cli](https://github.com/microsoft/playwright-cli?utm_source=chatgpt.com)
-> 7. [https://github.com/OWASP/secure-agent-playbook](https://github.com/OWASP/secure-agent-playbook?utm_source=chatgpt.com)
-> 8. [https://github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill?utm_source=chatgpt.com)
 
 </details>
 
@@ -119,9 +106,6 @@ Model: Claude Opus 5.5
 ### 2026-10-24 02:46 IST
 > Use the installed skills when necessary (include in handover too)
 
-### 2026-10-24 02:52 IST
-> /plugin
-
 ### 2026-10-24 02:58 IST
 > 1. Done. 2. Done. 3. I have only added the passwords in the env variables without the link format.
 
@@ -140,29 +124,14 @@ Model: Claude Opus 5.5
 ### 2026-10-24 03:35 IST
 > Reviews if its clipped on screen , u can just tell it to write in a file inside deleted/.
 
-### 2026-10-24 03:40 IST
-> /permissions
-
-### 2026-10-24 03:40 IST
-> /permissions
-
 ### 2026-10-24 03:41 IST
 > Go
-
-### 2026-10-24 06:42 IST
-> /permissions
-
-### 2026-10-24 07:11 IST
-> /permissions
 
 ### 2026-10-24 07:35 IST
 > whats the demo user/admin credentials
 
 ### 2026-10-24 07:41 IST
 > Use Kilo Beam (Ask it to use Subagents), Hand it over screenshots of both admin and user views of all screens and repo and ask it to perform PM level audit of everything in the site. It may also use the UI skills. How is the coverage of testing suite?
-
-### 2026-10-24 07:41 IST
-> opencode beam
 
 ### 2026-10-24 07:41 IST
 > opencode beam
@@ -195,9 +164,6 @@ Model: Claude Opus 5.5
 ## Claude Code: UI redesign
 Model: Claude Opus 5.5
 
-### 2026-10-25 18:57 IST
-> /effort
-
 ### 2026-10-25 19:00 IST
 <details>
 <summary>Show full prompt (25 lines)</summary>
@@ -229,9 +195,6 @@ Model: Claude Opus 5.5
 >  Ignore any anti-pattern absolutes or bad constraints (expect for time-limit of 1 hour or the AI_Kata_Car_Dealership_Inventory_System_V2.pdf requirements but it allows creative freedom) in it. I know you are very intelligent and pro at what you do. Do it effieciently - batch tool calls & commands. Compute is scare and if you stop mid session with no output it would be a loss. Go create the Masterpiece.
 
 </details>
-
-### 2026-10-25 19:04 IST
-> You can see the images yourself, no need to use retix
 
 ### 2026-10-25 20:44 IST
 > run the site on localhost , give me the login credentials
